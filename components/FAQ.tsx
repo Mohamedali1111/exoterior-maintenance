@@ -17,17 +17,17 @@ export default function FAQ() {
         <h2 className="text-center text-2xl font-bold text-white sm:text-3xl animate-[fade-in-up_0.6s_ease-out_both]">
           {t("title")}
         </h2>
-        <ul className="mt-8 space-y-3 sm:space-y-4">
+        <ul className="mt-8 list-none space-y-3 ps-0 pe-0 sm:space-y-4">
           {items.map(({ q, a }, i) => (
             <li
               key={q}
-              className="rounded-xl border border-neutral-800 bg-black/60 p-4 text-start transition-all duration-300 ease-out hover:border-red-500/50 hover:bg-neutral-900 hover:shadow-md hover:shadow-red-950/10 animate-[fade-in-up_0.6s_ease-out_both]"
+              className="rounded-xl border border-neutral-800 bg-black/60 p-4 ps-5 pe-5 text-start transition-all duration-300 ease-out hover:border-red-500/50 hover:bg-neutral-900 hover:shadow-md hover:shadow-red-950/10 animate-[fade-in-up_0.6s_ease-out_both]"
               style={{ animationDelay: `${150 + i * 100}ms` }}
             >
-              <h3 className="font-semibold text-white">
+              <h3 className="font-semibold text-white text-start">
                 {t(q)}
               </h3>
-              <p className="mt-2 text-sm text-neutral-400">
+              <p className="mt-2 text-sm text-neutral-400 text-start">
                 {t(a)}
               </p>
             </li>

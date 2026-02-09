@@ -242,8 +242,8 @@ export default function BookingForm() {
         <div className="rounded-2xl border border-neutral-800 bg-black/60 p-4 shadow-xl shadow-black/30 text-start sm:p-6 md:p-8 transition-all duration-300 hover:border-neutral-600 hover:shadow-red-950/10">
           {/* Step 1 */}
           {step === 1 && (
-            <div className="space-y-4">
-              <h3 className="text-lg font-semibold text-white">
+            <div className="space-y-4 text-start">
+              <h3 className="text-lg font-semibold text-white text-start">
                 {t("step1")}
               </h3>
               <div>
@@ -295,7 +295,7 @@ export default function BookingForm() {
                     type="button"
                     onClick={handleUseLocation}
                     disabled={locationLoading}
-                    className="min-h-[44px] shrink-0 rounded-lg border border-neutral-600 bg-neutral-800 px-4 py-2.5 text-sm font-medium text-neutral-300 transition-all duration-200 hover:border-neutral-500 hover:bg-neutral-700 disabled:opacity-50"
+                    className="min-h-[44px] shrink-0 rounded-lg border border-neutral-600 bg-neutral-800 px-4 py-2.5 text-sm font-medium text-neutral-300 transition-all duration-200 hover:border-neutral-500 hover:bg-neutral-700 disabled:opacity-50 text-start"
                   >
                     {locationLoading ? "…" : t("useMyLocation")}
                   </button>
@@ -313,11 +313,11 @@ export default function BookingForm() {
           {/* Step 2 */}
           {step === 2 && (
             <div className="space-y-6 text-start">
-              <h3 className="text-lg font-semibold text-white">
+              <h3 className="text-lg font-semibold text-white text-start">
                 {t("step2")}
               </h3>
               <div>
-                <p className="mb-2 text-sm font-medium text-neutral-300">
+                <p className="mb-2 text-sm font-medium text-neutral-300 text-start">
                   {t("mainService")}
                 </p>
                 <div className="flex flex-wrap gap-2">
@@ -342,7 +342,7 @@ export default function BookingForm() {
               </div>
               {formData.mainService && (
                 <div>
-                  <p className="mb-2 text-sm font-medium text-neutral-300">
+                  <p className="mb-2 text-sm font-medium text-neutral-300 text-start">
                     {t("subServices")}
                   </p>
                   <div className="flex flex-wrap gap-2">
@@ -397,7 +397,7 @@ export default function BookingForm() {
           {/* Step 3 */}
           {step === 3 && (
             <div className="space-y-6 text-start">
-              <h3 className="text-lg font-semibold text-white">
+              <h3 className="text-lg font-semibold text-white text-start">
                 {t("step3")}
               </h3>
               <p className="text-sm text-neutral-400">
@@ -452,33 +452,33 @@ export default function BookingForm() {
           {/* Step 4 */}
           {step === 4 && (
             <div className="space-y-6 text-start">
-              <h3 className="text-lg font-semibold text-white">
+              <h3 className="text-lg font-semibold text-white text-start">
                 {t("reviewSummary")}
               </h3>
-              <dl className="space-y-2 text-sm">
+              <dl className="space-y-2 text-sm text-start">
                 <div>
-                  <dt className="text-neutral-500">{t("fullName")}</dt>
-                  <dd className="font-medium text-white">{formData.fullName}</dd>
+                  <dt className="text-neutral-500 text-start">{t("fullName")}</dt>
+                  <dd className="font-medium text-white text-start">{formData.fullName}</dd>
                 </div>
                 <div>
-                  <dt className="text-neutral-500">{t("phone")}</dt>
-                  <dd className="font-medium text-white">{formData.phone}</dd>
+                  <dt className="text-neutral-500 text-start">{t("phone")}</dt>
+                  <dd className="font-medium text-white text-start" dir="ltr">{formData.phone}</dd>
                 </div>
                 <div>
-                  <dt className="text-neutral-500">{t("address")}</dt>
-                  <dd className="font-medium text-white">{formData.address}</dd>
+                  <dt className="text-neutral-500 text-start">{t("address")}</dt>
+                  <dd className="font-medium text-white text-start">{formData.address}</dd>
                 </div>
                 {formData.mainService && (
                   <>
                     <div>
-                      <dt className="text-neutral-500">{t("mainService")}</dt>
-                      <dd className="font-medium text-white">
+                      <dt className="text-neutral-500 text-start">{t("mainService")}</dt>
+                      <dd className="font-medium text-white text-start">
                         {tServices(`main.${formData.mainService}`)}
                       </dd>
                     </div>
                     <div>
-                      <dt className="text-neutral-500">{t("subServices")}</dt>
-                      <dd className="font-medium text-white">
+                      <dt className="text-neutral-500 text-start">{t("subServices")}</dt>
+                      <dd className="font-medium text-white text-start">
                         {formData.subServices.map((s) => tServices(`sub.${s}`)).join(", ")}
                       </dd>
                     </div>
@@ -486,24 +486,24 @@ export default function BookingForm() {
                 )}
                 {estimate && (
                   <div>
-                    <dt className="text-neutral-500">{t("estimatedCost")}</dt>
-                    <dd className="font-medium text-red-400">
+                    <dt className="text-neutral-500 text-start">{t("estimatedCost")}</dt>
+                    <dd className="font-medium text-red-400 text-start">
                       {t("estimatedCostRange", { min: estimate[0], max: estimate[1] })}
                     </dd>
                   </div>
                 )}
               </dl>
-              <p className="text-sm text-neutral-400">
+              <p className="text-sm text-neutral-400 text-start">
                 {t("contactAfterSubmit")}
               </p>
             </div>
           )}
 
-          <div className="mt-8 flex flex-col-reverse gap-3 sm:flex-row sm:justify-between">
+          <div className="mt-8 flex flex-col-reverse gap-3 sm:flex-row sm:justify-between rtl:sm:flex-row-reverse">
             <button
               type="button"
               onClick={() => setStep((s) => Math.max(1, s - 1))}
-              className="min-h-[48px] rounded-lg border border-neutral-600 px-4 py-2.5 text-sm font-medium text-neutral-300 transition-all duration-200 hover:border-neutral-500 hover:bg-neutral-800"
+              className="min-h-[48px] rounded-lg border border-neutral-600 px-4 py-2.5 text-sm font-medium text-neutral-300 transition-all duration-200 hover:border-neutral-500 hover:bg-neutral-800 text-start"
             >
               {t("back")}
             </button>
@@ -511,7 +511,7 @@ export default function BookingForm() {
               <button
                 type="button"
                 onClick={handleNext}
-                className="min-h-[48px] rounded-lg bg-red-600 px-4 py-2.5 text-sm font-semibold text-white shadow-lg shadow-red-950/30 transition-all duration-300 hover:scale-105 hover:bg-red-500 active:scale-100"
+                className="min-h-[48px] rounded-lg bg-red-600 px-4 py-2.5 text-sm font-semibold text-white shadow-lg shadow-red-950/30 transition-all duration-300 hover:scale-105 hover:bg-red-500 active:scale-100 text-start"
               >
                 {t("next")}
               </button>
@@ -524,7 +524,7 @@ export default function BookingForm() {
                   type="button"
                   onClick={handleSubmit}
                   disabled={submitLoading}
-                  className="min-h-[48px] w-full rounded-lg bg-red-600 px-4 py-2.5 text-sm font-semibold text-white shadow-lg shadow-red-950/30 transition-all duration-300 hover:scale-105 hover:bg-red-500 disabled:opacity-50 disabled:hover:scale-100 sm:w-auto"
+                  className="min-h-[48px] w-full rounded-lg bg-red-600 px-4 py-2.5 text-sm font-semibold text-white shadow-lg shadow-red-950/30 transition-all duration-300 hover:scale-105 hover:bg-red-500 disabled:opacity-50 disabled:hover:scale-100 sm:w-auto text-start"
                 >
                   {submitLoading ? "…" : t("submit")}
                 </button>

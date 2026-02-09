@@ -11,21 +11,21 @@ export default function Footer() {
   return (
     <footer id="footer" className="scroll-mt-20 border-t-4 border-red-600 bg-black px-4 py-10 text-neutral-300 sm:px-6 sm:py-12">
       <div className="mx-auto flex max-w-5xl flex-col gap-8 sm:flex-row sm:justify-between">
-        <div className="text-start">
+        <div className="w-full text-start sm:w-auto">
           <p className="font-semibold text-white">{t("contact")}</p>
-          <p className="mt-2 text-sm">
-            {t("phone")}: <a href="tel:+200000000000" className="transition-colors duration-200 hover:text-red-400">+20 000 000 0000</a>
+          <p className="mt-2 text-sm text-start">
+            {t("phone")}: <a href="tel:+200000000000" dir="ltr" className="inline-block transition-colors duration-200 hover:text-red-400" style={{ unicodeBidi: "isolate" }}>+20 000 000 0000</a>
           </p>
-          <p className="text-sm">
-            {t("whatsapp")}: <a href="https://wa.me/200000000000" target="_blank" rel="noopener noreferrer" className="transition-colors duration-200 hover:text-red-400">+20 000 000 0000</a>
+          <p className="text-sm text-start">
+            {t("whatsapp")}: <a href="https://wa.me/200000000000" target="_blank" rel="noopener noreferrer" dir="ltr" className="inline-block transition-colors duration-200 hover:text-red-400" style={{ unicodeBidi: "isolate" }}>+20 000 000 0000</a>
           </p>
-          <p className="text-sm">
-            {t("email")}: <a href="mailto:info@exoterior.com" className="transition-colors duration-200 hover:text-red-400">info@exoterior.com</a>
+          <p className="text-sm text-start">
+            {t("email")}: <a href="mailto:info@exoterior.com" dir="ltr" className="inline-block transition-colors duration-200 hover:text-red-400" style={{ unicodeBidi: "isolate" }}>info@exoterior.com</a>
           </p>
         </div>
-        <div className="text-start">
+        <div className="w-full text-start sm:w-auto">
           <p className="font-semibold text-white">{t("links")}</p>
-          <div className="mt-2 flex flex-col gap-1 text-sm">
+          <div className="mt-2 flex flex-col items-start gap-1 text-sm">
             <a href="#services" className="transition-colors duration-200 hover:text-red-400">{tNav("services")}</a>
             <a href="#booking" className="transition-colors duration-200 hover:text-red-400">{tNav("booking")}</a>
             <a href="#faq" className="transition-colors duration-200 hover:text-red-400">{tNav("faq")}</a>
