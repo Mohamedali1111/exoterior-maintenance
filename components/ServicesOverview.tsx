@@ -1,13 +1,19 @@
 "use client";
 
-import { useTranslations } from "next-intl";
+import { useTranslations, useLocale } from "next-intl";
 import { MAIN_SERVICES } from "@/lib/services";
 
 export default function ServicesOverview() {
   const t = useTranslations("services");
+  const locale = useLocale();
+  const isAr = locale === "ar";
 
   return (
-    <section id="services" className="scroll-mt-20 border-t border-neutral-800 bg-neutral-950 px-4 py-12 sm:px-6 sm:py-16 md:py-20">
+    <section
+      id="services"
+      className="scroll-mt-20 border-t border-neutral-800 bg-neutral-950 px-4 py-12 sm:px-6 sm:py-16 md:py-20"
+      dir={isAr ? "rtl" : "ltr"}
+    >
       <div className="mx-auto max-w-5xl">
         <h2 className="text-center text-2xl font-bold text-white sm:text-3xl animate-[fade-in-up_0.6s_ease-out_both]">
           {t("title")}

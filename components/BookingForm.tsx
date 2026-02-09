@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { useTranslations } from "next-intl";
+import { useTranslations, useLocale } from "next-intl";
 import {
   MAIN_SERVICES,
   SUB_SERVICES,
@@ -70,6 +70,8 @@ async function reverseGeocode(lat: number, lon: number): Promise<string> {
 export default function BookingForm() {
   const t = useTranslations("booking");
   const tServices = useTranslations("services");
+  const locale = useLocale();
+  const isAr = locale === "ar";
   const [step, setStep] = useState(1);
   const [formData, setFormData] = useState<FormData>(initialFormData);
   const [errors, setErrors] = useState<Errors>({});
@@ -221,13 +223,17 @@ export default function BookingForm() {
   }
 
   return (
-    <section id="booking" className="scroll-mt-20 border-t border-neutral-800 bg-neutral-950 px-4 py-12 sm:px-6 sm:py-16 md:py-20">
+    <section
+      id="booking"
+      className="scroll-mt-20 border-t border-neutral-800 bg-neutral-950 px-4 py-12 sm:px-6 sm:py-16 md:py-20"
+      dir={isAr ? "rtl" : "ltr"}
+    >
       <div className="mx-auto max-w-2xl">
         <h2 className="text-center text-2xl font-bold text-white sm:text-3xl animate-[fade-in-up_0.6s_ease-out_both]">
           {t("title")}
         </h2>
 
-        <div className="mb-6 flex gap-1.5 sm:gap-2">
+        <div className="mb-6 flex gap-1.5 sm:gap-2" role="progressbar" aria-valuenow={step} aria-valuemin={1} aria-valuemax={4} aria-label="Booking progress">
           {[1, 2, 3, 4].map((s) => (
             <div
               key={s}
@@ -499,11 +505,11 @@ export default function BookingForm() {
             </div>
           )}
 
-          <div className="mt-8 flex flex-col-reverse gap-3 sm:flex-row sm:justify-between rtl:sm:flex-row-reverse">
+          <div className="mt-8 flex flex-col-reverse gap-3 sm:flex-row sm:justify-between">
             <button
               type="button"
               onClick={() => setStep((s) => Math.max(1, s - 1))}
-              className="min-h-[48px] rounded-lg border border-neutral-600 px-4 py-2.5 text-sm font-medium text-neutral-300 transition-all duration-200 hover:border-neutral-500 hover:bg-neutral-800 text-start"
+              className="min-h-[48px] order-2 rounded-lg border border-neutral-600 px-4 py-2.5 text-sm font-medium text-neutral-300 transition-all duration-200 hover:border-neutral-500 hover:bg-neutral-800 text-start rtl:order-1"
             >
               {t("back")}
             </button>
@@ -511,12 +517,12 @@ export default function BookingForm() {
               <button
                 type="button"
                 onClick={handleNext}
-                className="min-h-[48px] rounded-lg bg-red-600 px-4 py-2.5 text-sm font-semibold text-white shadow-lg shadow-red-950/30 transition-all duration-300 hover:scale-105 hover:bg-red-500 active:scale-100 text-start"
+                className="min-h-[48px] order-1 rounded-lg bg-red-600 px-4 py-2.5 text-sm font-semibold text-white shadow-lg shadow-red-950/30 transition-all duration-300 hover:scale-105 hover:bg-red-500 active:scale-100 text-start rtl:order-2"
               >
                 {t("next")}
               </button>
             ) : (
-              <div className="sm:inline">
+              <div className="order-1 sm:inline rtl:order-2">
                 {submitError && (
                   <p className="mb-2 text-sm text-red-500 text-start">{submitError}</p>
                 )}
