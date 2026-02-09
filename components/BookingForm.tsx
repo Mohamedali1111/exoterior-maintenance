@@ -202,8 +202,8 @@ export default function BookingForm() {
 
   if (submitted) {
     return (
-      <section id="booking" className="scroll-mt-20 border-t border-neutral-800 bg-neutral-950 px-4 py-12 sm:py-16">
-        <div className="mx-auto max-w-lg rounded-2xl border-2 border-red-800 bg-red-950/30 p-6 text-center sm:p-8">
+      <section id="booking" className="scroll-mt-20 border-t border-white/[0.06] px-4 py-12 sm:py-16 pb-[max(3rem,env(safe-area-inset-bottom))]">
+        <div className="card-surface mx-auto max-w-lg rounded-2xl border-red-500/30 bg-red-950/20 p-6 text-center sm:p-8">
           <h2 className="text-xl font-bold text-red-400">
             {t("successTitle")}
           </h2>
@@ -213,7 +213,7 @@ export default function BookingForm() {
           <button
             type="button"
             onClick={() => window.scrollTo({ top: 0, behavior: "smooth" })}
-            className="mt-6 min-h-[48px] min-w-[160px] rounded-full bg-red-600 px-6 py-3 font-medium text-white shadow-lg shadow-red-950/30 transition-all duration-300 hover:scale-105 hover:bg-red-500"
+            className="mt-6 min-h-[52px] min-w-[180px] rounded-xl bg-red-600 px-6 py-3 font-semibold text-white shadow-lg shadow-red-950/40 transition-all duration-200 hover:bg-red-500 active:scale-[0.98]"
           >
             {t("successCta")}
           </button>
@@ -225,7 +225,7 @@ export default function BookingForm() {
   return (
     <section
       id="booking"
-      className="scroll-mt-20 border-t border-neutral-800 bg-neutral-950 px-4 py-12 sm:px-6 sm:py-16 md:py-20"
+      className="scroll-mt-20 border-t border-white/[0.06] px-4 py-12 sm:px-6 sm:py-16 md:py-20 pb-[max(3rem,env(safe-area-inset-bottom))]"
       dir={isAr ? "rtl" : "ltr"}
     >
       <div className="mx-auto max-w-2xl">
@@ -233,19 +233,19 @@ export default function BookingForm() {
           {t("title")}
         </h2>
 
-        <div className="mb-6 flex gap-1.5 sm:gap-2" role="progressbar" aria-valuenow={step} aria-valuemin={1} aria-valuemax={4} aria-label="Booking progress">
+        <div className="mb-6 flex gap-2 sm:gap-2.5" role="progressbar" aria-valuenow={step} aria-valuemin={1} aria-valuemax={4} aria-label="Booking progress">
           {[1, 2, 3, 4].map((s) => (
             <div
               key={s}
-              className={`h-2 flex-1 rounded-full transition-all duration-500 ease-out ${
-                s <= step ? "bg-red-600" : "bg-neutral-700"
+              className={`h-2.5 flex-1 rounded-full transition-all duration-500 ease-out sm:h-2 ${
+                s <= step ? "bg-red-600 shadow-[0_0_12px_rgba(220,38,38,0.4)]" : "bg-white/[0.12]"
               }`}
               aria-hidden
             />
           ))}
         </div>
 
-        <div className="rounded-2xl border border-neutral-800 bg-black/60 p-4 shadow-xl shadow-black/30 text-start sm:p-6 md:p-8 transition-all duration-300 hover:border-neutral-600 hover:shadow-red-950/10">
+        <div className="card-surface rounded-2xl p-4 text-start sm:p-6 md:p-8 transition-all duration-300">
           {/* Step 1 */}
           {step === 1 && (
             <div className="space-y-4 text-start">
@@ -261,7 +261,7 @@ export default function BookingForm() {
                   value={formData.fullName}
                   onChange={(e) => update({ fullName: e.target.value })}
                   placeholder={t("fullNamePlaceholder")}
-                  className="mt-1 min-h-[44px] w-full rounded-lg border border-neutral-600 bg-neutral-900 px-3 py-2.5 text-base text-white placeholder:text-neutral-500 transition-all duration-200 focus:border-red-500 focus:outline-none focus:ring-2 focus:ring-red-500/30 text-start"
+                  className="mt-1.5 min-h-[48px] w-full rounded-xl border border-white/[0.12] bg-white/[0.04] px-4 py-3 text-base text-white placeholder:text-neutral-500 transition-all duration-200 focus:border-red-500 focus:outline-none focus:ring-2 focus:ring-red-500/30 text-start"
                   dir={isAr ? "rtl" : "ltr"}
                 />
                 {errors.fullName && (
@@ -277,7 +277,7 @@ export default function BookingForm() {
                   value={formData.phone}
                   onChange={(e) => update({ phone: e.target.value })}
                   placeholder={t("phonePlaceholder")}
-                  className="mt-1 min-h-[44px] w-full rounded-lg border border-neutral-600 bg-neutral-900 px-3 py-2.5 text-base text-white placeholder:text-neutral-500 transition-all duration-200 focus:border-red-500 focus:outline-none focus:ring-2 focus:ring-red-500/30 text-start"
+                  className="mt-1.5 min-h-[48px] w-full rounded-xl border border-white/[0.12] bg-white/[0.04] px-4 py-3 text-base text-white placeholder:text-neutral-500 transition-all duration-200 focus:border-red-500 focus:outline-none focus:ring-2 focus:ring-red-500/30 text-start"
                   dir="ltr"
                 />
                 {errors.phone && (
@@ -294,14 +294,14 @@ export default function BookingForm() {
                     value={formData.address}
                     onChange={(e) => update({ address: e.target.value })}
                     placeholder={t("addressPlaceholder")}
-                    className="min-h-[44px] flex-1 rounded-lg border border-neutral-600 bg-neutral-900 px-3 py-2.5 text-base text-white placeholder:text-neutral-500 transition-all duration-200 focus:border-red-500 focus:outline-none focus:ring-2 focus:ring-red-500/30 text-start"
+                    className="min-h-[48px] flex-1 rounded-xl border border-white/[0.12] bg-white/[0.04] px-4 py-3 text-base text-white placeholder:text-neutral-500 transition-all duration-200 focus:border-red-500 focus:outline-none focus:ring-2 focus:ring-red-500/30 text-start"
                     dir={isAr ? "rtl" : "ltr"}
                   />
                   <button
                     type="button"
                     onClick={handleUseLocation}
                     disabled={locationLoading}
-                    className="min-h-[44px] shrink-0 rounded-lg border border-neutral-600 bg-neutral-800 px-4 py-2.5 text-sm font-medium text-neutral-300 transition-all duration-200 hover:border-neutral-500 hover:bg-neutral-700 disabled:opacity-50 text-start"
+                    className="min-h-[48px] shrink-0 rounded-xl border border-white/[0.12] bg-white/[0.06] px-4 py-3 text-sm font-medium text-neutral-300 transition-all duration-200 hover:border-white/20 hover:bg-white/[0.08] active:scale-[0.98] disabled:opacity-50 text-start"
                   >
                     {locationLoading ? "…" : t("useMyLocation")}
                   </button>
@@ -332,10 +332,10 @@ export default function BookingForm() {
                       key={id}
                       type="button"
                       onClick={() => selectMainService(id)}
-                      className={`rounded-lg border px-3 py-2.5 text-sm font-medium transition-all duration-200 min-h-[44px] sm:min-h-0 text-start ${
+                      className={`rounded-xl border border-white/[0.12] px-4 py-3 text-sm font-medium transition-all duration-200 min-h-[48px] sm:min-h-0 text-start ${
                         formData.mainService === id
-                          ? "border-red-600 bg-red-900/30 text-red-300 ring-2 ring-red-500/30"
-                          : "border-neutral-600 bg-neutral-900 text-neutral-300 hover:border-neutral-500 hover:bg-neutral-800"
+                          ? "border-red-500 bg-red-950/40 text-red-300 ring-2 ring-red-500/30"
+                          : "bg-white/[0.04] text-neutral-300 hover:border-white/20 hover:bg-white/[0.06]"
                       }`}
                     >
                       {tServices(`main.${id}`)}
@@ -353,7 +353,7 @@ export default function BookingForm() {
                   </p>
                   <div className="flex flex-wrap gap-2">
                     {SUB_SERVICES[formData.mainService].map((id) => (
-                      <label key={id} className="flex min-h-[44px] cursor-pointer items-center gap-3 rounded-lg border border-neutral-600 px-3 py-2.5 transition-all duration-200 hover:border-neutral-500 hover:bg-neutral-800/50">
+                      <label key={id} className="flex min-h-[48px] cursor-pointer items-center gap-3 rounded-xl border border-white/[0.12] bg-white/[0.03] px-4 py-3 transition-all duration-200 hover:border-white/20 hover:bg-white/[0.06] active:scale-[0.99]">
                         <input
                           type="checkbox"
                           checked={formData.subServices.includes(id)}
@@ -380,7 +380,7 @@ export default function BookingForm() {
                   onChange={(e) => update({ notes: e.target.value })}
                   placeholder={t("notesPlaceholder")}
                   rows={3}
-                  className="mt-1 min-h-[80px] w-full rounded-lg border border-neutral-600 bg-neutral-900 px-3 py-2.5 text-base text-white placeholder:text-neutral-500 transition-all duration-200 focus:border-red-500 focus:outline-none focus:ring-2 focus:ring-red-500/30 text-start"
+                  className="mt-1.5 min-h-[88px] w-full rounded-xl border border-white/[0.12] bg-white/[0.04] px-4 py-3 text-base text-white placeholder:text-neutral-500 transition-all duration-200 focus:border-red-500 focus:outline-none focus:ring-2 focus:ring-red-500/30 text-start"
                   dir={isAr ? "rtl" : "ltr"}
                 />
               </div>
@@ -393,7 +393,7 @@ export default function BookingForm() {
                   value={formData.imageLink}
                   onChange={(e) => update({ imageLink: e.target.value })}
                   placeholder={t("imageLinkPlaceholder")}
-                  className="mt-1 min-h-[44px] w-full rounded-lg border border-neutral-600 bg-neutral-900 px-3 py-2.5 text-base text-white placeholder:text-neutral-500 transition-all duration-200 focus:border-red-500 focus:outline-none focus:ring-2 focus:ring-red-500/30 text-start"
+                  className="mt-1.5 min-h-[48px] w-full rounded-xl border border-white/[0.12] bg-white/[0.04] px-4 py-3 text-base text-white placeholder:text-neutral-500 transition-all duration-200 focus:border-red-500 focus:outline-none focus:ring-2 focus:ring-red-500/30 text-start"
                   dir={isAr ? "rtl" : "ltr"}
                 />
               </div>
@@ -413,14 +413,14 @@ export default function BookingForm() {
                 href={GOOGLE_CALENDAR_APPOINTMENT_LINK}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="inline-flex min-h-[48px] items-center gap-2 rounded-lg bg-red-600 px-4 py-3 font-medium text-white shadow-lg shadow-red-950/30 transition-all duration-300 hover:scale-105 hover:bg-red-500 hover:shadow-red-500/25"
+                className="inline-flex min-h-[52px] items-center justify-center gap-2 rounded-xl bg-red-600 px-5 py-3.5 font-semibold text-white shadow-lg shadow-red-950/40 transition-all duration-200 hover:bg-red-500 active:scale-[0.98]"
               >
                 {t("selectAppointment")}
               </a>
               <p className="text-xs text-neutral-500">
                 {t("selectAppointmentHelp")}
               </p>
-              <label className="flex min-h-[44px] cursor-pointer items-center gap-3">
+              <label className="flex min-h-[48px] cursor-pointer items-center gap-3">
                 <input
                   type="checkbox"
                   checked={formData.appointmentConfirmed}
@@ -437,7 +437,7 @@ export default function BookingForm() {
                 <p className="text-sm text-red-500">{errors.appointmentConfirmed}</p>
               )}
               {estimate && (
-                <div className="rounded-lg border border-neutral-700 bg-neutral-900 p-4">
+                <div className="rounded-xl border border-white/[0.12] bg-white/[0.04] p-4">
                   <p className="text-sm font-medium text-neutral-300">
                     {t("estimatedCost")}
                   </p>
@@ -509,7 +509,7 @@ export default function BookingForm() {
             <button
               type="button"
               onClick={() => setStep((s) => Math.max(1, s - 1))}
-              className="min-h-[48px] rounded-lg border border-neutral-600 px-4 py-2.5 text-sm font-medium text-neutral-300 transition-all duration-200 hover:border-neutral-500 hover:bg-neutral-800 text-start rtl:order-1"
+              className="min-h-[52px] rounded-xl border border-white/[0.12] bg-white/[0.04] px-5 py-3 text-sm font-medium text-neutral-300 transition-all duration-200 hover:border-white/20 hover:bg-white/[0.08] active:scale-[0.98] text-start rtl:order-1"
             >
               {t("back")}
             </button>
@@ -517,7 +517,7 @@ export default function BookingForm() {
               <button
                 type="button"
                 onClick={handleNext}
-                className="min-h-[48px] rounded-lg bg-red-600 px-4 py-2.5 text-sm font-semibold text-white shadow-lg shadow-red-950/30 transition-all duration-300 hover:scale-105 hover:bg-red-500 active:scale-100 text-start rtl:order-2"
+                className="min-h-[52px] rounded-xl bg-red-600 px-5 py-3 text-sm font-semibold text-white shadow-lg shadow-red-950/40 transition-all duration-200 hover:bg-red-500 active:scale-[0.98] text-start rtl:order-2"
               >
                 {t("next")}
               </button>
@@ -530,7 +530,7 @@ export default function BookingForm() {
                   type="button"
                   onClick={handleSubmit}
                   disabled={submitLoading}
-                  className="min-h-[48px] w-full rounded-lg bg-red-600 px-4 py-2.5 text-sm font-semibold text-white shadow-lg shadow-red-950/30 transition-all duration-300 hover:scale-105 hover:bg-red-500 disabled:opacity-50 disabled:hover:scale-100 sm:w-auto text-start"
+                  className="min-h-[52px] w-full rounded-xl bg-red-600 px-5 py-3 text-sm font-semibold text-white shadow-lg shadow-red-950/40 transition-all duration-200 hover:bg-red-500 active:scale-[0.98] disabled:opacity-50 sm:w-auto text-start"
                 >
                   {submitLoading ? "…" : t("submit")}
                 </button>

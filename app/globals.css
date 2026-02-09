@@ -1,12 +1,16 @@
 @import "tailwindcss";
 
-/* Dark theme by default (black background) */
+/* Dark theme: gradient black, professional */
 :root {
   --background: #0a0a0a;
   --foreground: #fafafa;
   --accent: #dc2626;
   --accent-hover: #b91c1c;
   --accent-muted: rgba(127, 29, 29, 0.3);
+  --bg-gradient: linear-gradient(165deg, #0f0f0f 0%, #0a0a0a 35%, #050505 70%, #000000 100%);
+  --card-bg: rgba(10, 10, 10, 0.85);
+  --card-border: rgba(38, 38, 38, 0.8);
+  --card-glow: rgba(220, 38, 38, 0.06);
 }
 
 @theme inline {
@@ -53,13 +57,18 @@
 
 html {
   scroll-behavior: smooth;
+  -webkit-text-size-adjust: 100%;
 }
 
 body {
-  background: var(--background);
+  background: var(--bg-gradient);
+  background-attachment: fixed;
+  min-height: 100dvh;
   color: var(--foreground);
   font-family: var(--font-sans), system-ui, sans-serif;
   -webkit-tap-highlight-color: transparent;
+  padding-left: env(safe-area-inset-left);
+  padding-right: env(safe-area-inset-right);
 }
 
 /* Smooth transitions for interactive elements */
@@ -75,4 +84,20 @@ a, button {
   outline-offset: 2px;
 }
 
-/* RTL: use text-start on sections so content aligns by direction */
+/* Section spacing: comfortable on mobile, respects safe areas */
+.section-padding {
+  padding-top: env(safe-area-inset-top);
+  padding-bottom: env(safe-area-inset-bottom);
+}
+
+/* Card style for app-like surfaces */
+.card-surface {
+  background: var(--card-bg);
+  border: 1px solid var(--card-border);
+  box-shadow: 0 0 0 1px rgba(255, 255, 255, 0.03), 0 4px 24px rgba(0, 0, 0, 0.4);
+}
+.card-surface:focus-within,
+.card-surface:hover {
+  border-color: rgba(64, 64, 64, 0.9);
+  box-shadow: 0 0 0 1px rgba(255, 255, 255, 0.04), 0 0 40px var(--card-glow), 0 4px 24px rgba(0, 0, 0, 0.4);
+}
