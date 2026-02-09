@@ -261,8 +261,8 @@ export default function BookingForm() {
                   value={formData.fullName}
                   onChange={(e) => update({ fullName: e.target.value })}
                   placeholder={t("fullNamePlaceholder")}
-                  className="mt-1 min-h-[44px] w-full rounded-lg border border-neutral-600 bg-neutral-900 px-3 py-2.5 text-base text-white placeholder:text-neutral-500 transition-all duration-200 focus:border-red-500 focus:outline-none focus:ring-2 focus:ring-red-500/30"
-                  dir="auto"
+                  className="mt-1 min-h-[44px] w-full rounded-lg border border-neutral-600 bg-neutral-900 px-3 py-2.5 text-base text-white placeholder:text-neutral-500 transition-all duration-200 focus:border-red-500 focus:outline-none focus:ring-2 focus:ring-red-500/30 text-start"
+                  dir={isAr ? "rtl" : "ltr"}
                 />
                 {errors.fullName && (
                   <p className="mt-1 text-sm text-red-500 text-start">{errors.fullName}</p>
@@ -277,8 +277,8 @@ export default function BookingForm() {
                   value={formData.phone}
                   onChange={(e) => update({ phone: e.target.value })}
                   placeholder={t("phonePlaceholder")}
-                  className="mt-1 min-h-[44px] w-full rounded-lg border border-neutral-600 bg-neutral-900 px-3 py-2.5 text-base text-white placeholder:text-neutral-500 transition-all duration-200 focus:border-red-500 focus:outline-none focus:ring-2 focus:ring-red-500/30"
-                  dir="auto"
+                  className="mt-1 min-h-[44px] w-full rounded-lg border border-neutral-600 bg-neutral-900 px-3 py-2.5 text-base text-white placeholder:text-neutral-500 transition-all duration-200 focus:border-red-500 focus:outline-none focus:ring-2 focus:ring-red-500/30 text-start"
+                  dir="ltr"
                 />
                 {errors.phone && (
                   <p className="mt-1 text-sm text-red-500 text-start">{errors.phone}</p>
@@ -288,14 +288,14 @@ export default function BookingForm() {
                 <label className="block text-sm font-medium text-neutral-300 text-start">
                   {t("address")}
                 </label>
-                <div className="flex flex-col gap-2 sm:flex-row sm:items-start">
+                <div className="flex flex-col gap-2 sm:flex-row sm:items-start rtl:sm:flex-row-reverse">
                   <input
                     type="text"
                     value={formData.address}
                     onChange={(e) => update({ address: e.target.value })}
                     placeholder={t("addressPlaceholder")}
-                    className="min-h-[44px] flex-1 rounded-lg border border-neutral-600 bg-neutral-900 px-3 py-2.5 text-base text-white placeholder:text-neutral-500 transition-all duration-200 focus:border-red-500 focus:outline-none focus:ring-2 focus:ring-red-500/30"
-                    dir="auto"
+                    className="min-h-[44px] flex-1 rounded-lg border border-neutral-600 bg-neutral-900 px-3 py-2.5 text-base text-white placeholder:text-neutral-500 transition-all duration-200 focus:border-red-500 focus:outline-none focus:ring-2 focus:ring-red-500/30 text-start"
+                    dir={isAr ? "rtl" : "ltr"}
                   />
                   <button
                     type="button"
@@ -380,8 +380,8 @@ export default function BookingForm() {
                   onChange={(e) => update({ notes: e.target.value })}
                   placeholder={t("notesPlaceholder")}
                   rows={3}
-                  className="mt-1 min-h-[80px] w-full rounded-lg border border-neutral-600 bg-neutral-900 px-3 py-2.5 text-base text-white placeholder:text-neutral-500 transition-all duration-200 focus:border-red-500 focus:outline-none focus:ring-2 focus:ring-red-500/30"
-                  dir="auto"
+                  className="mt-1 min-h-[80px] w-full rounded-lg border border-neutral-600 bg-neutral-900 px-3 py-2.5 text-base text-white placeholder:text-neutral-500 transition-all duration-200 focus:border-red-500 focus:outline-none focus:ring-2 focus:ring-red-500/30 text-start"
+                  dir={isAr ? "rtl" : "ltr"}
                 />
               </div>
               <div>
@@ -393,8 +393,8 @@ export default function BookingForm() {
                   value={formData.imageLink}
                   onChange={(e) => update({ imageLink: e.target.value })}
                   placeholder={t("imageLinkPlaceholder")}
-                  className="mt-1 min-h-[44px] w-full rounded-lg border border-neutral-600 bg-neutral-900 px-3 py-2.5 text-base text-white placeholder:text-neutral-500 transition-all duration-200 focus:border-red-500 focus:outline-none focus:ring-2 focus:ring-red-500/30"
-                  dir="auto"
+                  className="mt-1 min-h-[44px] w-full rounded-lg border border-neutral-600 bg-neutral-900 px-3 py-2.5 text-base text-white placeholder:text-neutral-500 transition-all duration-200 focus:border-red-500 focus:outline-none focus:ring-2 focus:ring-red-500/30 text-start"
+                  dir={isAr ? "rtl" : "ltr"}
                 />
               </div>
             </div>
@@ -505,11 +505,11 @@ export default function BookingForm() {
             </div>
           )}
 
-          <div className="mt-8 flex flex-col-reverse gap-3 sm:flex-row sm:justify-between">
+          <div className="mt-8 flex flex-col gap-3 sm:flex-row sm:justify-between">
             <button
               type="button"
               onClick={() => setStep((s) => Math.max(1, s - 1))}
-              className="min-h-[48px] order-2 rounded-lg border border-neutral-600 px-4 py-2.5 text-sm font-medium text-neutral-300 transition-all duration-200 hover:border-neutral-500 hover:bg-neutral-800 text-start rtl:order-1"
+              className="min-h-[48px] rounded-lg border border-neutral-600 px-4 py-2.5 text-sm font-medium text-neutral-300 transition-all duration-200 hover:border-neutral-500 hover:bg-neutral-800 text-start rtl:order-1"
             >
               {t("back")}
             </button>
@@ -517,12 +517,12 @@ export default function BookingForm() {
               <button
                 type="button"
                 onClick={handleNext}
-                className="min-h-[48px] order-1 rounded-lg bg-red-600 px-4 py-2.5 text-sm font-semibold text-white shadow-lg shadow-red-950/30 transition-all duration-300 hover:scale-105 hover:bg-red-500 active:scale-100 text-start rtl:order-2"
+                className="min-h-[48px] rounded-lg bg-red-600 px-4 py-2.5 text-sm font-semibold text-white shadow-lg shadow-red-950/30 transition-all duration-300 hover:scale-105 hover:bg-red-500 active:scale-100 text-start rtl:order-2"
               >
                 {t("next")}
               </button>
             ) : (
-              <div className="order-1 sm:inline rtl:order-2">
+              <div className="rtl:order-2 sm:inline">
                 {submitError && (
                   <p className="mb-2 text-sm text-red-500 text-start">{submitError}</p>
                 )}

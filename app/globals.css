@@ -75,11 +75,4 @@ a, button {
   outline-offset: 2px;
 }
 
-/* RTL: ensure content starts from the right */
-[dir="rtl"] {
-  text-align: right;
-}
-
-[dir="rtl"] .text-start {
-  text-align: right;
-}
+/* RTL: use text-start on sections so content aligns by direction */
