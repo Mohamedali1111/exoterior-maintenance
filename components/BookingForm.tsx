@@ -15,24 +15,30 @@ const STEPS = 4;
 type FormData = {
   fullName: string;
   phone: string;
-  address: string;
-  mainService: MainServiceId | "";
+  street: string;
+  area: string;
+  city: string;
+  building: string;
   subServices: string[];
   notes: string;
-  imageLink: string;
   appointmentConfirmed: boolean;
 };
 
 const initialFormData: FormData = {
   fullName: "",
   phone: "",
-  address: "",
-  mainService: "",
+  street: "",
+  area: "",
+  city: "",
+  building: "",
   subServices: [],
   notes: "",
-  imageLink: "",
   appointmentConfirmed: false,
 };
+
+function formatFullAddress(data: { street: string; area: string; city: string; building: string }): string {
+  return [data.street, data.area, data.city, data.building].filter(Boolean).join(", ") || "";
+}
 
 type Errors = Partial<Record<keyof FormData, string>>;
 
@@ -50,21 +56,21 @@ function getEstimatedRange(subServiceIds: string[]): [number, number] | null {
   return min && max ? [min, max] : null;
 }
 
-async function reverseGeocode(lat: number, lon: number): Promise<string> {
+type GeocodedAddress = { street: string; area: string; city: string };
+
+async function reverseGeocode(lat: number, lon: number): Promise<GeocodedAddress> {
   const url = `https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lon}&zoom=18&addressdetails=1`;
   const res = await fetch(url, {
     headers: { "Accept-Language": "en" },
   });
   if (!res.ok) throw new Error("Geocoding failed");
   const data = await res.json();
-  const a = data.address;
-  const parts = [
-    a?.road,
-    a?.suburb || a?.neighbourhood,
-    a?.city_district || a?.city || a?.town,
-    a?.state,
-  ].filter(Boolean);
-  return parts.join(", ") || data.display_name || "";
+  const a = data.address || {};
+  return {
+    street: [a.road, a.house_number].filter(Boolean).join(" ") || "",
+    area: a.suburb || a.neighbourhood || a.city_district || "",
+    city: a.city || a.town || a.state || "",
+  };
 }
 
 export default function BookingForm() {
@@ -77,6 +83,7 @@ export default function BookingForm() {
   const [errors, setErrors] = useState<Errors>({});
   const [locationLoading, setLocationLoading] = useState(false);
   const [locationError, setLocationError] = useState<string | null>(null);
+  const [expandedCategory, setExpandedCategory] = useState<MainServiceId | null>(null);
   const [submitted, setSubmitted] = useState(false);
   const [submitLoading, setSubmitLoading] = useState(false);
   const [submitError, setSubmitError] = useState<string | null>(null);
@@ -96,14 +103,15 @@ export default function BookingForm() {
     if (!formData.phone.trim()) e.phone = t("validation.phoneRequired");
     else if (!EGYPT_PHONE_REGEX.test(formData.phone.replace(/\s/g, "")))
       e.phone = t("validation.phoneInvalid");
-    if (!formData.address.trim()) e.address = t("validation.addressRequired");
+    if (!formData.street.trim()) e.street = t("validation.addressRequired");
+    if (!formData.area.trim()) e.area = t("validation.addressRequired");
+    if (!formData.city.trim()) e.city = t("validation.addressRequired");
     setErrors(e);
     return Object.keys(e).length === 0;
   };
 
   const validateStep2 = (): boolean => {
     const e: Errors = {};
-    if (!formData.mainService) e.mainService = t("validation.mainServiceRequired");
     if (formData.subServices.length === 0)
       e.subServices = t("validation.subServiceRequired");
     setErrors(e);
@@ -136,11 +144,11 @@ export default function BookingForm() {
     navigator.geolocation.getCurrentPosition(
       async (pos) => {
         try {
-          const address = await reverseGeocode(
+          const { street, area, city } = await reverseGeocode(
             pos.coords.latitude,
             pos.coords.longitude
           );
-          update({ address });
+          update({ street, area, city });
         } catch {
           setLocationError("Could not get address");
         } finally {
@@ -164,9 +172,11 @@ export default function BookingForm() {
     setErrors((prev) => ({ ...prev, subServices: undefined }));
   };
 
-  const selectMainService = (id: MainServiceId) => {
-    update({ mainService: id, subServices: [] });
+  const toggleCategory = (id: MainServiceId) => {
+    setExpandedCategory((prev) => (prev === id ? null : id));
   };
+
+  const fullAddress = formatFullAddress(formData);
 
   const estimate = getEstimatedRange(formData.subServices);
 
@@ -180,11 +190,9 @@ export default function BookingForm() {
     body.append("_captcha", "false");
     body.append("Full Name", formData.fullName);
     body.append("Phone", formData.phone);
-    body.append("Address", formData.address);
-    body.append("Main Service", formData.mainService ? tServices(`main.${formData.mainService}`) : "");
-    body.append("Sub Services", formData.subServices.map((s) => tServices(`sub.${s}`)).join(", "));
+    body.append("Address", fullAddress);
+    body.append("Services", formData.subServices.map((s) => tServices(`sub.${s}`)).join(", "));
     body.append("Notes", formData.notes);
-    body.append("Image URL", formData.imageLink);
     body.append("Estimated Cost", `${min} - ${max} EGP`);
     try {
       const res = await fetch(`https://formsubmit.co/${FORMSUBMIT_EMAIL}`, {
@@ -286,33 +294,81 @@ export default function BookingForm() {
               </div>
               <div>
                 <label className="block text-sm font-medium text-neutral-300 text-start">
-                  {t("address")}
+                  {t("street")}
                 </label>
-                <div className="flex flex-col gap-2 sm:flex-row sm:items-start rtl:sm:flex-row-reverse">
-                  <input
-                    type="text"
-                    value={formData.address}
-                    onChange={(e) => update({ address: e.target.value })}
-                    placeholder={t("addressPlaceholder")}
-                    className="min-h-[48px] flex-1 rounded-xl border border-white/[0.12] bg-white/[0.04] px-4 py-3 text-base text-white placeholder:text-neutral-500 transition-all duration-200 focus:border-red-500 focus:outline-none focus:ring-2 focus:ring-red-500/30 text-start"
-                    dir={isAr ? "rtl" : "ltr"}
-                  />
-                  <button
-                    type="button"
-                    onClick={handleUseLocation}
-                    disabled={locationLoading}
-                    className="min-h-[48px] shrink-0 rounded-xl border border-white/[0.12] bg-white/[0.06] px-4 py-3 text-sm font-medium text-neutral-300 transition-all duration-200 hover:border-white/20 hover:bg-white/[0.08] active:scale-[0.98] disabled:opacity-50 text-start"
-                  >
-                    {locationLoading ? "…" : t("useMyLocation")}
-                  </button>
-                </div>
-                {errors.address && (
-                  <p className="mt-1 text-sm text-red-500 text-start">{errors.address}</p>
-                )}
-                {locationError && (
-                  <p className="mt-1 text-sm text-amber-500 text-start">{locationError}</p>
+                <input
+                  type="text"
+                  value={formData.street}
+                  onChange={(e) => update({ street: e.target.value })}
+                  placeholder={t("streetPlaceholder")}
+                  className="mt-1.5 min-h-[48px] w-full rounded-xl border border-white/[0.12] bg-white/[0.04] px-4 py-3 text-base text-white placeholder:text-neutral-500 transition-all duration-200 focus:border-red-500 focus:outline-none focus:ring-2 focus:ring-red-500/30 text-start"
+                  dir={isAr ? "rtl" : "ltr"}
+                />
+                {errors.street && (
+                  <p className="mt-1 text-sm text-red-500 text-start">{errors.street}</p>
                 )}
               </div>
+              <div>
+                <label className="block text-sm font-medium text-neutral-300 text-start">
+                  {t("area")}
+                </label>
+                <input
+                  type="text"
+                  value={formData.area}
+                  onChange={(e) => update({ area: e.target.value })}
+                  placeholder={t("areaPlaceholder")}
+                  className="mt-1.5 min-h-[48px] w-full rounded-xl border border-white/[0.12] bg-white/[0.04] px-4 py-3 text-base text-white placeholder:text-neutral-500 transition-all duration-200 focus:border-red-500 focus:outline-none focus:ring-2 focus:ring-red-500/30 text-start"
+                  dir={isAr ? "rtl" : "ltr"}
+                />
+                {errors.area && (
+                  <p className="mt-1 text-sm text-red-500 text-start">{errors.area}</p>
+                )}
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-neutral-300 text-start">
+                  {t("city")}
+                </label>
+                <input
+                  type="text"
+                  value={formData.city}
+                  onChange={(e) => update({ city: e.target.value })}
+                  placeholder={t("cityPlaceholder")}
+                  className="mt-1.5 min-h-[48px] w-full rounded-xl border border-white/[0.12] bg-white/[0.04] px-4 py-3 text-base text-white placeholder:text-neutral-500 transition-all duration-200 focus:border-red-500 focus:outline-none focus:ring-2 focus:ring-red-500/30 text-start"
+                  dir={isAr ? "rtl" : "ltr"}
+                />
+                {errors.city && (
+                  <p className="mt-1 text-sm text-red-500 text-start">{errors.city}</p>
+                )}
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-neutral-300 text-start">
+                  {t("building")}
+                </label>
+                <input
+                  type="text"
+                  value={formData.building}
+                  onChange={(e) => update({ building: e.target.value })}
+                  placeholder={t("buildingPlaceholder")}
+                  className="mt-1.5 min-h-[48px] w-full rounded-xl border border-white/[0.12] bg-white/[0.04] px-4 py-3 text-base text-white placeholder:text-neutral-500 transition-all duration-200 focus:border-red-500 focus:outline-none focus:ring-2 focus:ring-red-500/30 text-start"
+                  dir={isAr ? "rtl" : "ltr"}
+                />
+              </div>
+              <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between rtl:sm:flex-row-reverse">
+                <p className="text-sm font-medium text-neutral-400 text-start">
+                  {t("fullAddress")}: <span className="font-normal text-neutral-300">{fullAddress || "—"}</span>
+                </p>
+                <button
+                  type="button"
+                  onClick={handleUseLocation}
+                  disabled={locationLoading}
+                  className="min-h-[44px] shrink-0 rounded-xl border border-white/[0.12] bg-white/[0.06] px-4 py-2.5 text-sm font-medium text-neutral-300 transition-all duration-200 hover:border-white/20 hover:bg-white/[0.08] active:scale-[0.98] disabled:opacity-50 text-start"
+                >
+                  {locationLoading ? "…" : t("useMyLocation")}
+                </button>
+              </div>
+              {locationError && (
+                <p className="mt-1 text-sm text-amber-500 text-start">{locationError}</p>
+              )}
             </div>
           )}
 
@@ -322,55 +378,60 @@ export default function BookingForm() {
               <h3 className="text-lg font-semibold text-white text-start">
                 {t("step2")}
               </h3>
-              <div>
-                <p className="mb-2 text-sm font-medium text-neutral-300 text-start">
-                  {t("mainService")}
-                </p>
-                <div className="flex flex-wrap gap-2">
-                  {MAIN_SERVICES.map((id) => (
+              <p className="text-sm text-neutral-400 text-start">
+                {t("categories")} — {t("expandCategory")}
+              </p>
+              <div className="space-y-2">
+                {MAIN_SERVICES.map((mainId) => (
+                  <div
+                    key={mainId}
+                    className="overflow-hidden rounded-xl border border-white/[0.08] bg-white/[0.03] transition-all duration-200 hover:border-white/[0.12]"
+                  >
                     <button
-                      key={id}
                       type="button"
-                      onClick={() => selectMainService(id)}
-                      className={`rounded-xl border border-white/[0.12] px-4 py-3 text-sm font-medium transition-all duration-200 min-h-[48px] sm:min-h-0 text-start ${
-                        formData.mainService === id
-                          ? "border-red-500 bg-red-950/40 text-red-300 ring-2 ring-red-500/30"
-                          : "bg-white/[0.04] text-neutral-300 hover:border-white/20 hover:bg-white/[0.06]"
+                      onClick={() => toggleCategory(mainId)}
+                      className={`flex w-full min-h-[52px] items-center justify-between px-4 py-3 text-start transition-colors ${
+                        expandedCategory === mainId
+                          ? "border-b border-white/[0.08] bg-white/[0.05] text-red-400"
+                          : "text-neutral-200 hover:bg-white/[0.04]"
                       }`}
                     >
-                      {tServices(`main.${id}`)}
+                      <span className="font-medium">{tServices(`main.${mainId}`)}</span>
+                      <span className="text-lg text-neutral-500" aria-hidden>
+                        {expandedCategory === mainId ? "−" : "+"}
+                      </span>
                     </button>
-                  ))}
-                </div>
-                {errors.mainService && (
-                  <p className="mt-1 text-sm text-red-500">{errors.mainService}</p>
+                    {expandedCategory === mainId && (
+                      <div className="border-t border-white/[0.06] p-3 pt-2">
+                        <p className="mb-2 text-xs font-medium text-neutral-500 text-start">
+                          {t("subServices")}
+                        </p>
+                        <div className="flex flex-wrap gap-2">
+                          {SUB_SERVICES[mainId].map((subId) => (
+                            <label
+                              key={subId}
+                              className="flex min-h-[44px] cursor-pointer items-center gap-3 rounded-lg border border-white/[0.12] bg-white/[0.04] px-3 py-2.5 transition-all duration-200 hover:border-white/20 hover:bg-white/[0.06] active:scale-[0.99]"
+                            >
+                              <input
+                                type="checkbox"
+                                checked={formData.subServices.includes(subId)}
+                                onChange={() => toggleSubService(subId)}
+                                className="h-4 w-4 shrink-0 rounded border-neutral-500 text-red-600"
+                              />
+                              <span className="text-sm text-neutral-200">
+                                {tServices(`sub.${subId}`)}
+                              </span>
+                            </label>
+                          ))}
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                ))}
+                {errors.subServices && (
+                  <p className="mt-2 text-sm text-red-500 text-start">{errors.subServices}</p>
                 )}
               </div>
-              {formData.mainService && (
-                <div>
-                  <p className="mb-2 text-sm font-medium text-neutral-300 text-start">
-                    {t("subServices")}
-                  </p>
-                  <div className="flex flex-wrap gap-2">
-                    {SUB_SERVICES[formData.mainService].map((id) => (
-                      <label key={id} className="flex min-h-[48px] cursor-pointer items-center gap-3 rounded-xl border border-white/[0.12] bg-white/[0.03] px-4 py-3 transition-all duration-200 hover:border-white/20 hover:bg-white/[0.06] active:scale-[0.99]">
-                        <input
-                          type="checkbox"
-                          checked={formData.subServices.includes(id)}
-                          onChange={() => toggleSubService(id)}
-                          className="h-5 w-5 shrink-0 rounded border-neutral-500 text-red-600"
-                        />
-                        <span className="text-sm text-neutral-200">
-                          {tServices(`sub.${id}`)}
-                        </span>
-                      </label>
-                    ))}
-                  </div>
-                  {errors.subServices && (
-                    <p className="mt-1 text-sm text-red-500">{errors.subServices}</p>
-                  )}
-                </div>
-              )}
               <div>
                 <label className="block text-sm font-medium text-neutral-300 text-start">
                   {t("notes")}
@@ -381,19 +442,6 @@ export default function BookingForm() {
                   placeholder={t("notesPlaceholder")}
                   rows={3}
                   className="mt-1.5 min-h-[88px] w-full rounded-xl border border-white/[0.12] bg-white/[0.04] px-4 py-3 text-base text-white placeholder:text-neutral-500 transition-all duration-200 focus:border-red-500 focus:outline-none focus:ring-2 focus:ring-red-500/30 text-start"
-                  dir={isAr ? "rtl" : "ltr"}
-                />
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-neutral-300 text-start">
-                  {t("imageLink")}
-                </label>
-                <input
-                  type="url"
-                  value={formData.imageLink}
-                  onChange={(e) => update({ imageLink: e.target.value })}
-                  placeholder={t("imageLinkPlaceholder")}
-                  className="mt-1.5 min-h-[48px] w-full rounded-xl border border-white/[0.12] bg-white/[0.04] px-4 py-3 text-base text-white placeholder:text-neutral-500 transition-all duration-200 focus:border-red-500 focus:outline-none focus:ring-2 focus:ring-red-500/30 text-start"
                   dir={isAr ? "rtl" : "ltr"}
                 />
               </div>
@@ -471,24 +519,16 @@ export default function BookingForm() {
                   <dd className="font-medium text-white text-start" dir="ltr">{formData.phone}</dd>
                 </div>
                 <div>
-                  <dt className="text-neutral-500 text-start">{t("address")}</dt>
-                  <dd className="font-medium text-white text-start">{formData.address}</dd>
+                  <dt className="text-neutral-500 text-start">{t("fullAddress")}</dt>
+                  <dd className="font-medium text-white text-start">{fullAddress || "—"}</dd>
                 </div>
-                {formData.mainService && (
-                  <>
-                    <div>
-                      <dt className="text-neutral-500 text-start">{t("mainService")}</dt>
-                      <dd className="font-medium text-white text-start">
-                        {tServices(`main.${formData.mainService}`)}
-                      </dd>
-                    </div>
-                    <div>
-                      <dt className="text-neutral-500 text-start">{t("subServices")}</dt>
-                      <dd className="font-medium text-white text-start">
-                        {formData.subServices.map((s) => tServices(`sub.${s}`)).join(", ")}
-                      </dd>
-                    </div>
-                  </>
+                {formData.subServices.length > 0 && (
+                  <div>
+                    <dt className="text-neutral-500 text-start">{t("subServices")}</dt>
+                    <dd className="font-medium text-white text-start">
+                      {formData.subServices.map((s) => tServices(`sub.${s}`)).join(", ")}
+                    </dd>
+                  </div>
                 )}
                 {estimate && (
                   <div>
