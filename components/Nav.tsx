@@ -16,7 +16,7 @@ export default function Nav() {
 
   return (
     <nav
-      className="sticky top-0 z-50 border-b border-white/[0.06] bg-black/80 pt-[env(safe-area-inset-top)] backdrop-blur-xl supports-[backdrop-filter]:bg-neutral-950/80"
+      className="sticky top-0 z-50 border-b border-neutral-600/40 bg-neutral-950/90 pt-[env(safe-area-inset-top)] backdrop-blur-xl supports-[backdrop-filter]:bg-neutral-950/85"
       dir={isAr ? "rtl" : "ltr"}
     >
       <div className="mx-auto flex max-w-6xl items-center justify-between gap-2 px-4 py-3 sm:gap-4 sm:px-6 sm:py-3.5">

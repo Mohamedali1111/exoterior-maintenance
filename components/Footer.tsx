@@ -8,7 +8,7 @@ export default function Footer() {
   const isAr = useLocale() === "ar";
 
   return (
-    <footer id="footer" className="scroll-mt-20 border-t border-red-600/80 bg-black/90 px-4 pt-10 pb-[max(2rem,env(safe-area-inset-bottom))] text-neutral-300 sm:px-6 sm:py-12" dir={isAr ? "rtl" : "ltr"}>
+    <footer id="footer" className="scroll-mt-20 border-t-4 border-red-600 bg-black px-4 pt-10 pb-[max(2rem,env(safe-area-inset-bottom))] text-neutral-300 sm:px-6 sm:py-12" dir={isAr ? "rtl" : "ltr"}>
       <div className="mx-auto flex max-w-5xl flex-col gap-8 sm:flex-row sm:justify-between text-start">
         <div className="w-full sm:w-auto">
           <p className="font-semibold text-white">{t("contact")}</p>

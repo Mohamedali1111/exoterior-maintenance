@@ -14,7 +14,7 @@ export default function FAQ() {
   const isAr = locale === "ar";
 
   return (
-    <section id="faq" className="scroll-mt-20 border-t border-white/[0.06] px-4 py-12 sm:px-6 sm:py-16 md:py-20 pb-[max(3rem,env(safe-area-inset-bottom))]" dir={isAr ? "rtl" : "ltr"}>
+    <section id="faq" className="scroll-mt-20 border-t border-neutral-600/40 px-4 py-12 sm:px-6 sm:py-16 md:py-20 pb-[max(3rem,env(safe-area-inset-bottom))]" dir={isAr ? "rtl" : "ltr"}>
       <div className="mx-auto max-w-2xl">
         <h2 className="text-center text-2xl font-bold text-white sm:text-3xl animate-[fade-in-up_0.6s_ease-out_both]">
           {t("title")}

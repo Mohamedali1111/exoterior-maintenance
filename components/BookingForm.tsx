@@ -210,7 +210,7 @@ export default function BookingForm() {
 
   if (submitted) {
     return (
-      <section id="booking" className="scroll-mt-20 border-t border-white/[0.06] px-4 py-12 sm:py-16 pb-[max(3rem,env(safe-area-inset-bottom))]">
+      <section id="booking" className="scroll-mt-20 border-t border-neutral-600/40 px-4 py-12 sm:py-16 pb-[max(3rem,env(safe-area-inset-bottom))]">
         <div className="card-surface mx-auto max-w-lg rounded-2xl border-red-500/30 bg-red-950/20 p-6 text-center sm:p-8">
           <h2 className="text-xl font-bold text-red-400">
             {t("successTitle")}
@@ -233,7 +233,7 @@ export default function BookingForm() {
   return (
     <section
       id="booking"
-      className="scroll-mt-20 border-t border-white/[0.06] px-4 py-12 sm:px-6 sm:py-16 md:py-20 pb-[max(3rem,env(safe-area-inset-bottom))]"
+      className="scroll-mt-20 border-t border-neutral-600/40 px-4 py-12 sm:px-6 sm:py-16 md:py-20 pb-[max(3rem,env(safe-area-inset-bottom))]"
       dir={isAr ? "rtl" : "ltr"}
     >
       <div className="mx-auto max-w-2xl">

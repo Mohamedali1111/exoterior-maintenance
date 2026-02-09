@@ -1,16 +1,20 @@
 @import "tailwindcss";
 
-/* Dark theme: gradient black, professional */
+/* Dark theme: gradient black & grey, catchy and professional */
 :root {
   --background: #0a0a0a;
   --foreground: #fafafa;
   --accent: #dc2626;
   --accent-hover: #b91c1c;
   --accent-muted: rgba(127, 29, 29, 0.3);
-  --bg-gradient: linear-gradient(165deg, #0f0f0f 0%, #0a0a0a 35%, #050505 70%, #000000 100%);
-  --card-bg: rgba(10, 10, 10, 0.85);
-  --card-border: rgba(38, 38, 38, 0.8);
-  --card-glow: rgba(220, 38, 38, 0.06);
+  /* Black & grey gradient: soft grey top → mid grey → deep black bottom */
+  --bg-gradient: linear-gradient(175deg, #1c1c1c 0%, #171717 18%, #121212 38%, #0d0d0d 60%, #080808 82%, #000000 100%);
+  /* Subtle radial for depth (centered, soft) */
+  --bg-radial: radial-gradient(ellipse 80% 50% at 50% -20%, rgba(64, 64, 64, 0.15), transparent 50%);
+  --card-bg: rgba(18, 18, 18, 0.9);
+  --card-border: rgba(55, 55, 55, 0.9);
+  --card-glow: rgba(220, 38, 38, 0.08);
+  --card-glow-strong: rgba(220, 38, 38, 0.15);
 }
 
 @theme inline {
@@ -61,7 +65,7 @@ html {
 }
 
 body {
-  background: var(--bg-gradient);
+  background: var(--bg-radial), var(--bg-gradient);
   background-attachment: fixed;
   min-height: 100dvh;
   color: var(--foreground);
@@ -90,14 +94,15 @@ a, button {
   padding-bottom: env(safe-area-inset-bottom);
 }
 
-/* Card style for app-like surfaces */
+/* Card style for app-like surfaces – catchy glow */
 .card-surface {
   background: var(--card-bg);
   border: 1px solid var(--card-border);
-  box-shadow: 0 0 0 1px rgba(255, 255, 255, 0.03), 0 4px 24px rgba(0, 0, 0, 0.4);
+  box-shadow: 0 0 0 1px rgba(255, 255, 255, 0.04), 0 4px 24px rgba(0, 0, 0, 0.35);
+  transition: border-color 0.25s ease, box-shadow 0.25s ease;
 }
 .card-surface:focus-within,
 .card-surface:hover {
-  border-color: rgba(64, 64, 64, 0.9);
-  box-shadow: 0 0 0 1px rgba(255, 255, 255, 0.04), 0 0 40px var(--card-glow), 0 4px 24px rgba(0, 0, 0, 0.4);
+  border-color: rgba(70, 70, 70, 0.95);
+  box-shadow: 0 0 0 1px rgba(255, 255, 255, 0.06), 0 0 48px var(--card-glow), 0 0 24px var(--card-glow), 0 8px 32px rgba(0, 0, 0, 0.4);
 }
