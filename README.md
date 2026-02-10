@@ -69,19 +69,62 @@ Booking submissions are sent to **your email** via [FormSubmit](https://formsubm
 
 After that, every booking (name, phone, address, appointment date/time, services, notes) is emailed to you.
 
-## Database (optional – for slot blocking)
+## How to enable Supabase (slot blocking)
 
-There is **no database by default**. The form works without one: submissions go to your email only, and all time slots appear available.
+Supabase stores bookings and blocks the same time slot for two people. Follow these steps:
 
-To **store appointments and block booked slots** (so others can’t pick the same time):
+### Step 1: Create a Supabase project
 
-1. Create a free [Supabase](https://supabase.com) project.
-2. In the SQL Editor, run the script in `lib/supabase-appointments.sql` to create the `appointments` table.
-3. In `.env.local` (and in Vercel), set:
-   - `NEXT_PUBLIC_SUPABASE_URL` – your project URL
-   - `SUPABASE_SERVICE_ROLE_KEY` – your service role key (Project Settings → API)
+1. Go to **[supabase.com](https://supabase.com)** and sign up or log in.
+2. Click **“New project”**.
+3. Choose your organization (or create one), set a **project name** (e.g. `exoterior`), set a **database password** (save it somewhere safe), and pick a **region** close to you.
+4. Click **“Create new project”** and wait until the project is ready (about 1–2 minutes).
 
-With these set, booked slots are saved and shown as unavailable; if two people book the same slot, only the first succeeds.
+### Step 2: Create the appointments table
+
+1. In the left sidebar, open **“SQL Editor”**.
+2. Click **“New query”**.
+3. Open the file **`lib/supabase-appointments.sql`** in your project and copy **all** its contents.
+4. Paste into the Supabase SQL Editor.
+5. Click **“Run”** (or press Ctrl+Enter). You should see “Success. No rows returned.”
+6. In the left sidebar, open **“Table Editor”**. You should see a table named **`appointments`**.
+
+### Step 3: Get your API keys
+
+1. In the left sidebar, click the **gear icon** (Project Settings).
+2. Click **“API”** in the left menu.
+3. You will see:
+   - **Project URL** (e.g. `https://abcdefgh.supabase.co`) → this is your **Supabase URL**.
+   - **Project API keys**:
+     - **anon public** – do **not** use this for the app.
+     - **service_role** – click **“Reveal”** and copy this key. This is your **Service role key**. Keep it secret (do not commit it to Git or share it).
+
+### Step 4: Add the keys to your app
+
+1. Open (or create) the file **`.env.local`** in your project root (same folder as `package.json`).
+2. Add these two lines (use your real URL and key from Step 3):
+
+```env
+NEXT_PUBLIC_SUPABASE_URL=https://YOUR_PROJECT_REF.supabase.co
+SUPABASE_SERVICE_ROLE_KEY=your-service-role-key-pasted-here
+```
+
+3. Replace `YOUR_PROJECT_REF` with your actual project reference from the URL, and paste the full **service_role** key.
+4. Save the file.
+
+### Step 5: Restart and test
+
+1. Stop the dev server (Ctrl+C) and run **`npm run dev`** again so it picks up the new env vars.
+2. Open the booking form, pick a date and time, and submit. The slot should then appear as **booked** (unavailable) for that date when you or someone else selects the same date.
+
+### Deploying on Vercel
+
+In your Vercel project: **Settings → Environment Variables**, add the same two variables:
+
+- **NEXT_PUBLIC_SUPABASE_URL** = your Supabase project URL  
+- **SUPABASE_SERVICE_ROLE_KEY** = your service role key  
+
+Then **redeploy**. After that, slot blocking works on the live site too.
 
 ## Deploy on Vercel
 

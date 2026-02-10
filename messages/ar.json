@@ -152,6 +152,7 @@
     "pickTime": "اختر الوقت",
     "pickDateFirst": "اختر التاريخ أولاً.",
     "loadingSlots": "جاري التحقق من التوفر…",
+    "slotStorageNotice": "مواعيد الساعات غير محجوزة على هذا الخادم. لتفادي الحجز المزدوج يمكن لمالك الموقع تفعيل Supabase (راجع README). ستستلم تأكيداً بالبريد.",
     "slotHour": "–",
     "slotBooked": "محجوز",
     "selectedSlot": "المحدد",

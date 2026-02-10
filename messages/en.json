@@ -152,6 +152,7 @@
     "pickTime": "Choose time",
     "pickDateFirst": "Select a date first.",
     "loadingSlots": "Checking availability…",
+    "slotStorageNotice": "Slot times are not reserved on this server. To prevent double-booking, the site owner can enable Supabase (see README). You will still receive a confirmation by email.",
     "slotHour": "–",
     "slotBooked": "Booked",
     "selectedSlot": "Selected",
