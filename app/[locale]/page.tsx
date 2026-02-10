@@ -1,11 +1,13 @@
 import { setRequestLocale, getTranslations } from "next-intl/server";
+import dynamic from "next/dynamic";
 import Nav from "@/components/Nav";
 import Hero from "@/components/Hero";
-import ServicesOverview from "@/components/ServicesOverview";
-import WhyExoterior from "@/components/WhyExoterior";
-import HowItWorks from "@/components/HowItWorks";
-import BookingForm from "@/components/BookingForm";
 import Footer from "@/components/Footer";
+
+const ServicesOverview = dynamic(() => import("@/components/ServicesOverview"), { ssr: true });
+const WhyExoterior = dynamic(() => import("@/components/WhyExoterior"), { ssr: true });
+const HowItWorks = dynamic(() => import("@/components/HowItWorks"), { ssr: true });
+const BookingForm = dynamic(() => import("@/components/BookingForm"), { ssr: true });
 
 type Props = { params: Promise<{ locale: string }> };
 
