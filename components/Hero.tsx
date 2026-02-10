@@ -1,6 +1,7 @@
 "use client";
 
 import { useTranslations } from "next-intl";
+import { useRef, useEffect } from "react";
 
 const HERO_VIDEO_SRC =
   typeof process.env.NEXT_PUBLIC_HERO_VIDEO_URL === "string" &&
@@ -10,17 +11,47 @@ const HERO_VIDEO_SRC =
 
 export default function Hero() {
   const t = useTranslations("hero");
+  const videoRef = useRef<HTMLVideoElement>(null);
+
+  // Force play on mount and when visible again (e.g. after client-side nav) – no controls
+  useEffect(() => {
+    const video = videoRef.current;
+    if (!video) return;
+
+    const play = () => {
+      video.muted = true;
+      video.play().catch(() => {});
+    };
+
+    play();
+
+    const observer = new IntersectionObserver(
+      (entries) => {
+        entries.forEach((entry) => {
+          if (entry.isIntersecting) play();
+        });
+      },
+      { threshold: 0.25 }
+    );
+    observer.observe(video);
+
+    return () => observer.disconnect();
+  }, []);
 
   return (
     <section className="relative min-h-[50vh] overflow-hidden border-b-4 border-red-600 px-4 pb-16 pt-14 sm:min-h-[60vh] sm:pb-24 sm:pt-16 md:min-h-[65vh] md:pb-28 md:pt-20">
       <div className="absolute inset-0">
         <video
+          ref={videoRef}
           autoPlay
           muted
           loop
           playsInline
-          preload="metadata"
-          className="h-full w-full object-cover"
+          preload="auto"
+          disablePictureInPicture
+          disableRemotePlayback
+          className="h-full w-full object-cover [object-position:center_center] pointer-events-none"
+          style={{ background: "#0a0a0a" }}
           aria-hidden
           src={HERO_VIDEO_SRC}
         />
