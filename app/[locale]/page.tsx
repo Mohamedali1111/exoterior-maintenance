@@ -5,7 +5,6 @@ import ServicesOverview from "@/components/ServicesOverview";
 import WhyExoterior from "@/components/WhyExoterior";
 import HowItWorks from "@/components/HowItWorks";
 import BookingForm from "@/components/BookingForm";
-import FAQ from "@/components/FAQ";
 import Footer from "@/components/Footer";
 
 type Props = { params: Promise<{ locale: string }> };
@@ -29,7 +28,6 @@ export default async function HomePage({ params }: Props) {
         <WhyExoterior />
         <HowItWorks />
         <BookingForm />
-        <FAQ />
         <Footer />
       </main>
     </>

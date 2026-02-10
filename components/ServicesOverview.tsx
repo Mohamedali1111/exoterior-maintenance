@@ -11,7 +11,7 @@ export default function ServicesOverview() {
   return (
     <section
       id="services"
-      className="scroll-mt-20 border-t border-neutral-600/40 px-4 py-12 sm:px-6 sm:py-16 md:py-20 pb-[max(3rem,env(safe-area-inset-bottom))]"
+      className="scroll-mt-20 border-t border-neutral-600/40 px-4 py-14 sm:px-6 sm:py-16 md:py-20 pb-[max(3rem,env(safe-area-inset-bottom))]"
       dir={isAr ? "rtl" : "ltr"}
     >
       <div className="mx-auto max-w-5xl">

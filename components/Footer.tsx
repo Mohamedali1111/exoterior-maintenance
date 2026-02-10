@@ -27,7 +27,6 @@ export default function Footer() {
           <div className="mt-3 flex flex-col items-start gap-2 text-sm">
             <a href="#services" className="min-h-[44px] flex items-center py-1 transition-colors duration-200 hover:text-red-400 active:opacity-80">{tNav("services")}</a>
             <a href="#booking" className="min-h-[44px] flex items-center py-1 transition-colors duration-200 hover:text-red-400 active:opacity-80">{tNav("booking")}</a>
-            <a href="#faq" className="min-h-[44px] flex items-center py-1 transition-colors duration-200 hover:text-red-400 active:opacity-80">{tNav("faq")}</a>
           </div>
         </div>
       </div>

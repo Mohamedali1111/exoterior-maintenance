@@ -233,15 +233,15 @@ export default function BookingForm() {
   return (
     <section
       id="booking"
-      className="scroll-mt-20 border-t border-neutral-600/40 px-4 py-12 sm:px-6 sm:py-16 md:py-20 pb-[max(3rem,env(safe-area-inset-bottom))]"
+      className="scroll-mt-20 border-t border-neutral-600/40 px-4 py-14 sm:px-6 sm:py-16 md:py-20 pb-[max(3rem,env(safe-area-inset-bottom))]"
       dir={isAr ? "rtl" : "ltr"}
     >
       <div className="mx-auto max-w-2xl">
-        <h2 className="text-center text-2xl font-bold text-white sm:text-3xl animate-[fade-in-up_0.6s_ease-out_both]">
+        <h2 className="text-center text-2xl font-bold leading-tight text-white sm:text-3xl animate-[fade-in-up_0.6s_ease-out_both]">
           {t("title")}
         </h2>
 
-        <div className="mb-6 flex gap-2 sm:gap-2.5" role="progressbar" aria-valuenow={step} aria-valuemin={1} aria-valuemax={4} aria-label="Booking progress">
+        <div className="mt-8 flex gap-2 sm:gap-2.5" role="progressbar" aria-valuenow={step} aria-valuemin={1} aria-valuemax={4} aria-label="Booking progress">
           {[1, 2, 3, 4].map((s) => (
             <div
               key={s}
@@ -253,11 +253,11 @@ export default function BookingForm() {
           ))}
         </div>
 
-        <div className="card-surface rounded-2xl p-4 text-start sm:p-6 md:p-8 transition-all duration-300">
+        <div className="mt-8 card-surface rounded-2xl p-5 text-start sm:p-6 md:p-8 transition-all duration-300">
           {/* Step 1 */}
           {step === 1 && (
-            <div className="space-y-4 text-start">
-              <h3 className="text-lg font-semibold text-white text-start">
+            <div className="space-y-5 text-start">
+              <h3 className="text-lg font-semibold text-white text-start pb-1">
                 {t("step1")}
               </h3>
               <div>
@@ -269,7 +269,7 @@ export default function BookingForm() {
                   value={formData.fullName}
                   onChange={(e) => update({ fullName: e.target.value })}
                   placeholder={t("fullNamePlaceholder")}
-                  className="mt-1.5 min-h-[48px] w-full rounded-xl border border-white/[0.12] bg-white/[0.04] px-4 py-3 text-base text-white placeholder:text-neutral-500 transition-all duration-200 focus:border-red-500 focus:outline-none focus:ring-2 focus:ring-red-500/30 text-start"
+                  className="mt-1.5 min-h-[48px] w-full touch-manipulation rounded-xl border border-white/[0.12] bg-white/[0.04] px-4 py-3 text-base text-white placeholder:text-neutral-500 transition-all duration-200 focus:border-red-500 focus:outline-none focus:ring-2 focus:ring-red-500/30 text-start"
                   dir={isAr ? "rtl" : "ltr"}
                 />
                 {errors.fullName && (
@@ -285,7 +285,7 @@ export default function BookingForm() {
                   value={formData.phone}
                   onChange={(e) => update({ phone: e.target.value })}
                   placeholder={t("phonePlaceholder")}
-                  className="mt-1.5 min-h-[48px] w-full rounded-xl border border-white/[0.12] bg-white/[0.04] px-4 py-3 text-base text-white placeholder:text-neutral-500 transition-all duration-200 focus:border-red-500 focus:outline-none focus:ring-2 focus:ring-red-500/30 text-start"
+                  className="mt-1.5 min-h-[48px] w-full touch-manipulation rounded-xl border border-white/[0.12] bg-white/[0.04] px-4 py-3 text-base text-white placeholder:text-neutral-500 transition-all duration-200 focus:border-red-500 focus:outline-none focus:ring-2 focus:ring-red-500/30 text-start"
                   dir="ltr"
                 />
                 {errors.phone && (
@@ -301,7 +301,7 @@ export default function BookingForm() {
                   value={formData.street}
                   onChange={(e) => update({ street: e.target.value })}
                   placeholder={t("streetPlaceholder")}
-                  className="mt-1.5 min-h-[48px] w-full rounded-xl border border-white/[0.12] bg-white/[0.04] px-4 py-3 text-base text-white placeholder:text-neutral-500 transition-all duration-200 focus:border-red-500 focus:outline-none focus:ring-2 focus:ring-red-500/30 text-start"
+                  className="mt-1.5 min-h-[48px] w-full touch-manipulation rounded-xl border border-white/[0.12] bg-white/[0.04] px-4 py-3 text-base text-white placeholder:text-neutral-500 transition-all duration-200 focus:border-red-500 focus:outline-none focus:ring-2 focus:ring-red-500/30 text-start"
                   dir={isAr ? "rtl" : "ltr"}
                 />
                 {errors.street && (
@@ -317,7 +317,7 @@ export default function BookingForm() {
                   value={formData.area}
                   onChange={(e) => update({ area: e.target.value })}
                   placeholder={t("areaPlaceholder")}
-                  className="mt-1.5 min-h-[48px] w-full rounded-xl border border-white/[0.12] bg-white/[0.04] px-4 py-3 text-base text-white placeholder:text-neutral-500 transition-all duration-200 focus:border-red-500 focus:outline-none focus:ring-2 focus:ring-red-500/30 text-start"
+                  className="mt-1.5 min-h-[48px] w-full touch-manipulation rounded-xl border border-white/[0.12] bg-white/[0.04] px-4 py-3 text-base text-white placeholder:text-neutral-500 transition-all duration-200 focus:border-red-500 focus:outline-none focus:ring-2 focus:ring-red-500/30 text-start"
                   dir={isAr ? "rtl" : "ltr"}
                 />
                 {errors.area && (
@@ -333,7 +333,7 @@ export default function BookingForm() {
                   value={formData.city}
                   onChange={(e) => update({ city: e.target.value })}
                   placeholder={t("cityPlaceholder")}
-                  className="mt-1.5 min-h-[48px] w-full rounded-xl border border-white/[0.12] bg-white/[0.04] px-4 py-3 text-base text-white placeholder:text-neutral-500 transition-all duration-200 focus:border-red-500 focus:outline-none focus:ring-2 focus:ring-red-500/30 text-start"
+                  className="mt-1.5 min-h-[48px] w-full touch-manipulation rounded-xl border border-white/[0.12] bg-white/[0.04] px-4 py-3 text-base text-white placeholder:text-neutral-500 transition-all duration-200 focus:border-red-500 focus:outline-none focus:ring-2 focus:ring-red-500/30 text-start"
                   dir={isAr ? "rtl" : "ltr"}
                 />
                 {errors.city && (
@@ -349,7 +349,7 @@ export default function BookingForm() {
                   value={formData.building}
                   onChange={(e) => update({ building: e.target.value })}
                   placeholder={t("buildingPlaceholder")}
-                  className="mt-1.5 min-h-[48px] w-full rounded-xl border border-white/[0.12] bg-white/[0.04] px-4 py-3 text-base text-white placeholder:text-neutral-500 transition-all duration-200 focus:border-red-500 focus:outline-none focus:ring-2 focus:ring-red-500/30 text-start"
+                  className="mt-1.5 min-h-[48px] w-full touch-manipulation rounded-xl border border-white/[0.12] bg-white/[0.04] px-4 py-3 text-base text-white placeholder:text-neutral-500 transition-all duration-200 focus:border-red-500 focus:outline-none focus:ring-2 focus:ring-red-500/30 text-start"
                   dir={isAr ? "rtl" : "ltr"}
                 />
               </div>
@@ -361,7 +361,7 @@ export default function BookingForm() {
                   type="button"
                   onClick={handleUseLocation}
                   disabled={locationLoading}
-                  className="min-h-[44px] shrink-0 rounded-xl border border-white/[0.12] bg-white/[0.06] px-4 py-2.5 text-sm font-medium text-neutral-300 transition-all duration-200 hover:border-white/20 hover:bg-white/[0.08] active:scale-[0.98] disabled:opacity-50 text-start"
+                  className="min-h-[48px] shrink-0 touch-manipulation rounded-xl border border-white/[0.12] bg-white/[0.06] px-4 py-3 text-sm font-medium text-neutral-300 transition-all duration-200 hover:border-white/20 hover:bg-white/[0.08] active:scale-[0.98] disabled:opacity-50 text-start"
                 >
                   {locationLoading ? "…" : t("useMyLocation")}
                 </button>
@@ -375,7 +375,7 @@ export default function BookingForm() {
           {/* Step 2 */}
           {step === 2 && (
             <div className="space-y-6 text-start">
-              <h3 className="text-lg font-semibold text-white text-start">
+              <h3 className="text-lg font-semibold text-white text-start pb-1">
                 {t("step2")}
               </h3>
               <p className="text-sm text-neutral-400 text-start">
@@ -390,7 +390,7 @@ export default function BookingForm() {
                     <button
                       type="button"
                       onClick={() => toggleCategory(mainId)}
-                      className={`flex w-full min-h-[52px] items-center justify-between px-4 py-3 text-start transition-colors ${
+                      className={`flex w-full min-h-[48px] touch-manipulation items-center justify-between px-4 py-3.5 text-start transition-colors sm:min-h-[52px] ${
                         expandedCategory === mainId
                           ? "border-b border-white/[0.08] bg-white/[0.05] text-red-400"
                           : "text-neutral-200 hover:bg-white/[0.04]"
@@ -441,7 +441,7 @@ export default function BookingForm() {
                   onChange={(e) => update({ notes: e.target.value })}
                   placeholder={t("notesPlaceholder")}
                   rows={3}
-                  className="mt-1.5 min-h-[88px] w-full rounded-xl border border-white/[0.12] bg-white/[0.04] px-4 py-3 text-base text-white placeholder:text-neutral-500 transition-all duration-200 focus:border-red-500 focus:outline-none focus:ring-2 focus:ring-red-500/30 text-start"
+                  className="mt-1.5 min-h-[88px] w-full touch-manipulation rounded-xl border border-white/[0.12] bg-white/[0.04] px-4 py-3 text-base text-white placeholder:text-neutral-500 transition-all duration-200 focus:border-red-500 focus:outline-none focus:ring-2 focus:ring-red-500/30 text-start"
                   dir={isAr ? "rtl" : "ltr"}
                 />
               </div>
@@ -451,7 +451,7 @@ export default function BookingForm() {
           {/* Step 3 */}
           {step === 3 && (
             <div className="space-y-6 text-start">
-              <h3 className="text-lg font-semibold text-white text-start">
+              <h3 className="text-lg font-semibold text-white text-start pb-1">
                 {t("step3")}
               </h3>
               <p className="text-sm text-neutral-400">
@@ -506,7 +506,7 @@ export default function BookingForm() {
           {/* Step 4 */}
           {step === 4 && (
             <div className="space-y-6 text-start">
-              <h3 className="text-lg font-semibold text-white text-start">
+              <h3 className="text-lg font-semibold text-white text-start pb-1">
                 {t("reviewSummary")}
               </h3>
               <dl className="space-y-2 text-sm text-start">
@@ -545,11 +545,11 @@ export default function BookingForm() {
             </div>
           )}
 
-          <div className="mt-8 flex flex-col gap-3 sm:flex-row sm:justify-between">
+          <div className="mt-10 flex flex-col gap-4 sm:flex-row sm:justify-between sm:gap-4">
             <button
               type="button"
               onClick={() => setStep((s) => Math.max(1, s - 1))}
-              className="min-h-[52px] rounded-xl border border-white/[0.12] bg-white/[0.04] px-5 py-3 text-sm font-medium text-neutral-300 transition-all duration-200 hover:border-white/20 hover:bg-white/[0.08] active:scale-[0.98] text-start rtl:order-1"
+              className="min-h-[48px] touch-manipulation rounded-xl border border-white/[0.12] bg-white/[0.04] px-5 py-3.5 text-sm font-medium text-neutral-300 transition-all duration-200 hover:border-white/20 hover:bg-white/[0.08] active:scale-[0.98] text-start rtl:order-1 sm:min-h-[52px]"
             >
               {t("back")}
             </button>
@@ -557,7 +557,7 @@ export default function BookingForm() {
               <button
                 type="button"
                 onClick={handleNext}
-                className="min-h-[52px] rounded-xl bg-red-600 px-5 py-3 text-sm font-semibold text-white shadow-lg shadow-red-950/40 transition-all duration-200 hover:bg-red-500 active:scale-[0.98] text-start rtl:order-2"
+                className="min-h-[48px] touch-manipulation rounded-xl bg-red-600 px-5 py-3.5 text-sm font-semibold text-white shadow-lg shadow-red-950/40 transition-all duration-200 hover:bg-red-500 active:scale-[0.98] text-start rtl:order-2 sm:min-h-[52px]"
               >
                 {t("next")}
               </button>
@@ -570,7 +570,7 @@ export default function BookingForm() {
                   type="button"
                   onClick={handleSubmit}
                   disabled={submitLoading}
-                  className="min-h-[52px] w-full rounded-xl bg-red-600 px-5 py-3 text-sm font-semibold text-white shadow-lg shadow-red-950/40 transition-all duration-200 hover:bg-red-500 active:scale-[0.98] disabled:opacity-50 sm:w-auto text-start"
+                  className="min-h-[48px] touch-manipulation w-full rounded-xl bg-red-600 px-5 py-3.5 text-sm font-semibold text-white shadow-lg shadow-red-950/40 transition-all duration-200 hover:bg-red-500 active:scale-[0.98] disabled:opacity-50 sm:min-h-[52px] sm:w-auto text-start"
                 >
                   {submitLoading ? "…" : t("submit")}
                 </button>

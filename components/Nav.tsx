@@ -6,7 +6,6 @@ import { Link } from "@/i18n/navigation";
 const navLinks = [
   { key: "services", href: "#services" },
   { key: "how", href: "#how" },
-  { key: "faq", href: "#faq" },
 ] as const;
 
 export default function Nav() {
@@ -19,7 +18,7 @@ export default function Nav() {
       className="sticky top-0 z-50 border-b border-neutral-600/40 bg-neutral-950/90 pt-[env(safe-area-inset-top)] backdrop-blur-xl supports-[backdrop-filter]:bg-neutral-950/85"
       dir={isAr ? "rtl" : "ltr"}
     >
-      <div className="mx-auto flex max-w-6xl items-center justify-between gap-2 px-4 py-3 sm:gap-4 sm:px-6 sm:py-3.5">
+      <div className="mx-auto flex max-w-6xl items-center justify-between gap-2 px-4 py-3.5 sm:gap-4 sm:px-6">
         <Link
           href="/"
           className="min-h-[44px] min-w-[44px] flex items-center text-lg font-bold tracking-tight text-white sm:text-xl transition-colors duration-200 hover:text-red-400 active:opacity-80"
@@ -68,7 +67,7 @@ export default function Nav() {
           </div>
           <a
             href="#booking"
-            className="flex min-h-[44px] min-w-[44px] shrink-0 items-center justify-center rounded-full bg-red-600 px-5 py-2.5 text-sm font-semibold text-white shadow-lg shadow-red-950/40 transition-all duration-200 hover:bg-red-500 active:scale-[0.98] active:bg-red-700 sm:min-w-0 sm:px-5"
+            className="flex min-h-[44px] min-w-[44px] shrink-0 touch-manipulation items-center justify-center rounded-full bg-red-600 px-5 py-3 text-sm font-semibold text-white shadow-lg shadow-red-950/40 transition-all duration-200 hover:bg-red-500 active:scale-[0.98] active:bg-red-700 sm:min-w-0 sm:py-2.5"
           >
             {t("booking")}
           </a>
