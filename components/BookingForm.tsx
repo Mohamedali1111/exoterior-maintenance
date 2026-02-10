@@ -334,7 +334,7 @@ export default function BookingForm() {
           ))}
         </div>
 
-        <div className="mt-6 sm:mt-8 card-surface rounded-2xl p-4 text-start sm:p-6 md:p-8 transition-all duration-300 min-w-0">
+        <div className="mt-6 sm:mt-8 card-surface rounded-2xl p-4 text-start sm:p-6 md:p-8 transition-all duration-300 min-w-0 overflow-hidden w-full max-w-full box-border">
           {/* Step 1 – mobile-first inputs */}
           {step === 1 && (
             <div className="space-y-4 sm:space-y-5 text-start">
@@ -523,7 +523,7 @@ export default function BookingForm() {
 
           {/* Step 3 – Date & time: 1-hour slots, mobile-friendly calendar */}
           {step === 3 && (
-            <div className="space-y-4 sm:space-y-6 text-start min-w-0">
+            <div className="space-y-4 sm:space-y-6 text-start min-w-0 overflow-hidden">
               <h3 className="text-base sm:text-lg font-semibold text-white text-start pb-1">
                 {t("step3")}
               </h3>
@@ -533,33 +533,36 @@ export default function BookingForm() {
 
               {/* Notice when slot storage not active (no Supabase) */}
               {formData.appointmentDate && slotStorageActive === false && (
-                <div className="rounded-xl border border-amber-500/40 bg-amber-950/30 px-4 py-3 text-start" role="status">
-                  <p className="text-sm text-amber-200">
+                <div className="rounded-xl border border-amber-500/40 bg-amber-950/30 px-4 py-3 text-start min-w-0" role="status">
+                  <p className="text-sm text-amber-200 break-words">
                     {t("slotStorageNotice")}
                   </p>
                 </div>
               )}
 
-              {/* Date */}
-              <div className="min-w-0">
-                <label htmlFor="booking-date" className="block text-sm font-medium text-neutral-300 text-start">
+              {/* Date – constrained to form width, aligned with other fields */}
+              <div className="min-w-0 w-full overflow-hidden">
+                <label htmlFor="booking-date" className="block text-sm font-medium text-neutral-300 text-start mb-1.5">
                   {t("pickDate")}
                 </label>
-                <input
-                  id="booking-date"
-                  type="date"
-                  value={formData.appointmentDate}
-                  onChange={(e) => update({ appointmentDate: e.target.value, appointmentTime: "" })}
-                  min={new Date().toISOString().slice(0, 10)}
-                  max={
-                    new Date(Date.now() + APPOINTMENT_DAYS_AHEAD * 24 * 60 * 60 * 1000)
-                      .toISOString()
-                      .slice(0, 10)
-                  }
-                  className="mt-1.5 min-h-[48px] sm:min-h-[52px] w-full max-w-full touch-manipulation rounded-xl border border-white/12 bg-white/5 px-4 py-3 text-base text-white transition-all duration-200 focus:border-red-500 focus:outline-none focus:ring-2 focus:ring-red-500/30 text-start [color-scheme:dark]"
-                  dir="ltr"
-                  aria-describedby={errors.appointmentDate ? "date-error" : undefined}
-                />
+                <div className="relative w-full min-w-0 max-w-full overflow-hidden rounded-xl border border-white/12 bg-white/5 focus-within:border-red-500 focus-within:ring-2 focus-within:ring-red-500/30 [color-scheme:dark]">
+                  <input
+                    id="booking-date"
+                    type="date"
+                    value={formData.appointmentDate}
+                    onChange={(e) => update({ appointmentDate: e.target.value, appointmentTime: "" })}
+                    min={new Date().toISOString().slice(0, 10)}
+                    max={
+                      new Date(Date.now() + APPOINTMENT_DAYS_AHEAD * 24 * 60 * 60 * 1000)
+                        .toISOString()
+                        .slice(0, 10)
+                    }
+                    className="block w-full min-w-0 max-w-full min-h-[48px] sm:min-h-[52px] touch-manipulation rounded-xl border-0 bg-transparent px-4 py-3 text-base text-white outline-none text-start [color-scheme:dark]"
+                    dir="ltr"
+                    style={{ boxSizing: "border-box" }}
+                    aria-describedby={errors.appointmentDate ? "date-error" : undefined}
+                  />
+                </div>
                 {formData.appointmentDate && (
                   <p className="mt-2 text-xs sm:text-sm text-neutral-400 text-start break-words" aria-hidden>
                     {new Date(formData.appointmentDate + "T12:00:00").toLocaleDateString(locale === "ar" ? "ar-EG" : "en-GB", {
