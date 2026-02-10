@@ -2,19 +2,38 @@
 
 import { useTranslations } from "next-intl";
 
+const HERO_VIDEO_SRC =
+  typeof process.env.NEXT_PUBLIC_HERO_VIDEO_URL === "string" &&
+  process.env.NEXT_PUBLIC_HERO_VIDEO_URL.length > 0
+    ? process.env.NEXT_PUBLIC_HERO_VIDEO_URL
+    : "/videos/hero-bg.mp4";
+
 export default function Hero() {
   const t = useTranslations("hero");
 
   return (
-    <section className="relative overflow-hidden border-b-4 border-red-600 px-4 pb-16 pt-14 sm:pb-24 sm:pt-16 md:pb-28 md:pt-20">
-      {/* Soft black & grey gradient overlay – blends with page bg */}
-      <div className="absolute inset-0 bg-gradient-to-b from-neutral-800/40 via-neutral-900/20 to-transparent pointer-events-none" aria-hidden />
-      <div className="absolute inset-0 bg-gradient-to-b from-transparent via-transparent to-black/30 pointer-events-none" aria-hidden />
-      <div className="relative mx-auto max-w-3xl text-center">
-        <h1 className="text-4xl font-bold tracking-tight text-white drop-shadow-md sm:text-5xl md:text-6xl animate-[fade-in-up_0.7s_ease-out_both]">
+    <section className="relative min-h-[50vh] overflow-hidden border-b-4 border-red-600 px-4 pb-16 pt-14 sm:min-h-[60vh] sm:pb-24 sm:pt-16 md:min-h-[65vh] md:pb-28 md:pt-20">
+      <div className="absolute inset-0">
+        <video
+          autoPlay
+          muted
+          loop
+          playsInline
+          preload="auto"
+          className="h-full w-full object-cover"
+          aria-hidden
+          src={HERO_VIDEO_SRC}
+        />
+      </div>
+      {/* Overlays: darken video so text stays readable and blend with page */}
+      <div className="absolute inset-0 bg-gradient-to-b from-black/70 via-black/50 to-black/80 pointer-events-none" aria-hidden />
+      <div className="absolute inset-0 bg-gradient-to-b from-transparent via-transparent to-black/40 pointer-events-none" aria-hidden />
+      {/* Content */}
+      <div className="relative z-10 mx-auto flex min-h-[40vh] max-w-3xl flex-col items-center justify-center text-center sm:min-h-[50vh]">
+        <h1 className="text-4xl font-bold tracking-tight text-white drop-shadow-lg sm:text-5xl md:text-6xl animate-[fade-in-up_0.7s_ease-out_both]">
           Exoterior
         </h1>
-        <p className="mt-4 text-base leading-relaxed text-neutral-400 sm:text-lg md:text-xl animate-[fade-in-up_0.7s_ease-out_0.15s_both]">
+        <p className="mt-4 text-base leading-relaxed text-neutral-200 drop-shadow-md sm:text-lg md:text-xl animate-[fade-in-up_0.7s_ease-out_0.15s_both]">
           {t("tagline")}
         </p>
         <a

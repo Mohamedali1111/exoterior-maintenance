@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useRef, useEffect } from "react";
 import { useTranslations, useLocale } from "next-intl";
 import { MAIN_SERVICES, SUB_SERVICES, type MainServiceId } from "@/lib/services";
 import { EGYPT_PHONE_REGEX, GOOGLE_CALENDAR_APPOINTMENT_LINK, FORMSUBMIT_EMAIL, GOVERNORATE_IDS } from "@/lib/constants";
@@ -97,6 +97,16 @@ export default function BookingForm() {
   const [submitted, setSubmitted] = useState(false);
   const [submitLoading, setSubmitLoading] = useState(false);
   const [submitError, setSubmitError] = useState<string | null>(null);
+  const formScrollRef = useRef<HTMLDivElement>(null);
+  const isFirstRender = useRef(true);
+
+  useEffect(() => {
+    if (isFirstRender.current) {
+      isFirstRender.current = false;
+      return;
+    }
+    formScrollRef.current?.scrollIntoView({ behavior: "smooth", block: "start" });
+  }, [step]);
 
   const update = (updates: Partial<FormData>) => {
     setFormData((prev) => ({ ...prev, ...updates }));
@@ -249,7 +259,7 @@ export default function BookingForm() {
       className="scroll-mt-20 border-t border-neutral-600/40 px-4 py-14 sm:px-6 sm:py-16 md:py-20 pb-[max(3rem,env(safe-area-inset-bottom))]"
       dir={isAr ? "rtl" : "ltr"}
     >
-      <div className="mx-auto max-w-2xl">
+      <div ref={formScrollRef} className="mx-auto max-w-2xl scroll-mt-24">
         <h2 className="text-center text-2xl font-bold leading-tight text-white sm:text-3xl animate-[fade-in-up_0.6s_ease-out_both]">
           {t("title")}
         </h2>
