@@ -147,10 +147,16 @@
     "subServices": "الخدمات الفرعية (اختر واحدة أو أكثر)",
     "notes": "وصف المشكلة (اختياري)",
     "notesPlaceholder": "صف المشكلة…",
-    "appointmentDuration": "مدة الموعد: ساعة واحدة",
-    "selectAppointment": "اختر الموعد",
-    "selectAppointmentHelp": "يفتح تقويم جوجل لاختيار الموعد. يمنع الحجز المزدوج.",
-    "iBookedAppointment": "لقد حجزت موعدي",
+    "appointmentDuration": "مدة الموعد: ساعة واحدة. اختر التاريخ والوقت أدناه.",
+    "pickDate": "اختر التاريخ",
+    "pickTime": "اختر الوقت",
+    "pickDateFirst": "اختر التاريخ أولاً.",
+    "loadingSlots": "جاري التحقق من التوفر…",
+    "slotHour": "–",
+    "slotBooked": "محجوز",
+    "selectedSlot": "المحدد",
+    "oneHour": "ساعة واحدة",
+    "appointment": "الموعد",
     "paymentMethods": "طرق الدفع",
     "paymentMethodsDesc": "نقبل النقد، إنستاباي، والمحافظ الإلكترونية (فودافون كاش، أورانج كاش، اتصالات كاش وغيرها). يتم الدفع في الموقع بعد تنفيذ الخدمة.",
     "reviewSummary": "راجع طلبك",
@@ -164,7 +170,11 @@
       "phoneInvalid": "استخدم رقم موبايل مصري صحيح (مثال: 01xxxxxxxxx)",
       "addressRequired": "المحافظة والعنوان مطلوبان",
       "subServiceRequired": "اختر خدمة فرعية واحدة على الأقل",
-      "appointmentConfirmedRequired": "يرجى حجز الموعد أولاً"
+      "dateRequired": "يرجى اختيار التاريخ",
+      "timeRequired": "يرجى اختيار الوقت",
+      "slotTaken": "هذا الموعد محجوز",
+      "slotJustBooked": "تم حجز هذا الموعد للتو. يرجى اختيار تاريخ أو وقت آخر.",
+      "submitFailed": "حدث خطأ. يرجى المحاولة مرة أخرى أو التواصل معنا."
     }
   },
   "faq": {

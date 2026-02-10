@@ -147,10 +147,16 @@
     "subServices": "Sub-services (choose one or more)",
     "notes": "Describe the issue (optional)",
     "notesPlaceholder": "Describe the issue…",
-    "appointmentDuration": "Appointment duration: 1 hour",
-    "selectAppointment": "Select appointment",
-    "selectAppointmentHelp": "Opens Google Calendar to pick a slot. Prevents double-booking.",
-    "iBookedAppointment": "I have booked my appointment",
+    "appointmentDuration": "Appointment duration: 1 hour. Choose date and time below.",
+    "pickDate": "Choose date",
+    "pickTime": "Choose time",
+    "pickDateFirst": "Select a date first.",
+    "loadingSlots": "Checking availability…",
+    "slotHour": "–",
+    "slotBooked": "Booked",
+    "selectedSlot": "Selected",
+    "oneHour": "1 hour",
+    "appointment": "Appointment",
     "paymentMethods": "Payment methods",
     "paymentMethodsDesc": "We accept cash, InstaPay, and mobile wallets (Vodafone Cash, Orange Cash, Etisalat Cash, and others). Payment is settled on site after the service.",
     "reviewSummary": "Review your request",
@@ -164,7 +170,11 @@
       "phoneInvalid": "Use a valid Egypt mobile (e.g. 01xxxxxxxxx)",
       "addressRequired": "Governorate and address are required",
       "subServiceRequired": "Select at least one sub-service",
-      "appointmentConfirmedRequired": "Please book your appointment first"
+      "dateRequired": "Please choose a date",
+      "timeRequired": "Please choose a time",
+      "slotTaken": "This slot is already booked",
+      "slotJustBooked": "This slot was just booked. Please choose another date or time.",
+      "submitFailed": "Something went wrong. Please try again or contact us directly."
     }
   },
   "faq": {

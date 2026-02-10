@@ -3,7 +3,7 @@
 import { useState, useRef, useEffect } from "react";
 import { useTranslations, useLocale } from "next-intl";
 import { MAIN_SERVICES, SUB_SERVICES, type MainServiceId } from "@/lib/services";
-import { EGYPT_PHONE_REGEX, GOOGLE_CALENDAR_APPOINTMENT_LINK, FORMSUBMIT_EMAIL, GOVERNORATE_IDS } from "@/lib/constants";
+import { EGYPT_PHONE_REGEX, FORMSUBMIT_EMAIL, GOVERNORATE_IDS, APPOINTMENT_TIME_SLOTS, APPOINTMENT_DAYS_AHEAD, slotEndTime } from "@/lib/constants";
 
 const STEPS = 4;
 
@@ -14,7 +14,8 @@ type FormData = {
   addressLine: string;
   subServices: string[];
   notes: string;
-  appointmentConfirmed: boolean;
+  appointmentDate: string;
+  appointmentTime: string;
 };
 
 const initialFormData: FormData = {
@@ -24,7 +25,8 @@ const initialFormData: FormData = {
   addressLine: "",
   subServices: [],
   notes: "",
-  appointmentConfirmed: false,
+  appointmentDate: "",
+  appointmentTime: "",
 };
 
 type Errors = Partial<Record<keyof FormData, string>>;
@@ -97,8 +99,23 @@ export default function BookingForm() {
   const [submitted, setSubmitted] = useState(false);
   const [submitLoading, setSubmitLoading] = useState(false);
   const [submitError, setSubmitError] = useState<string | null>(null);
+  const [takenSlots, setTakenSlots] = useState<string[]>([]);
+  const [slotsLoading, setSlotsLoading] = useState(false);
   const formScrollRef = useRef<HTMLDivElement>(null);
   const isFirstRender = useRef(true);
+
+  useEffect(() => {
+    if (!formData.appointmentDate) {
+      setTakenSlots([]);
+      return;
+    }
+    setSlotsLoading(true);
+    fetch(`/api/slots?date=${formData.appointmentDate}`)
+      .then((r) => r.json())
+      .then((data) => setTakenSlots(data.taken ?? []))
+      .catch(() => setTakenSlots([]))
+      .finally(() => setSlotsLoading(false));
+  }, [formData.appointmentDate]);
 
   useEffect(() => {
     if (isFirstRender.current) {
@@ -139,8 +156,10 @@ export default function BookingForm() {
 
   const validateStep3 = (): boolean => {
     const e: Errors = {};
-    if (!formData.appointmentConfirmed)
-      e.appointmentConfirmed = t("validation.appointmentConfirmedRequired");
+    if (!formData.appointmentDate) e.appointmentDate = t("validation.dateRequired");
+    if (!formData.appointmentTime) e.appointmentTime = t("validation.timeRequired");
+    if (formData.appointmentDate && formData.appointmentTime && takenSlots.includes(formData.appointmentTime))
+      e.appointmentTime = t("validation.slotTaken");
     setErrors(e);
     return Object.keys(e).length === 0;
   };
@@ -209,23 +228,43 @@ export default function BookingForm() {
     if (step !== STEPS) return;
     setSubmitError(null);
     setSubmitLoading(true);
-    const body = new FormData();
-    body.append("_subject", "Exoterior – New booking request");
-    body.append("_captcha", "false");
-    body.append("Full Name", formData.fullName);
-    body.append("Phone", formData.phone);
-    body.append("Address", fullAddressDisplay);
-    body.append("Services", formData.subServices.map((s) => tServices(`sub.${s}`)).join(", "));
-    body.append("Notes", formData.notes);
     try {
-      const res = await fetch(`https://formsubmit.co/${FORMSUBMIT_EMAIL}`, {
+      const res = await fetch("/api/appointments", {
         method: "POST",
-        body,
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          date: formData.appointmentDate,
+          timeSlot: formData.appointmentTime,
+          fullName: formData.fullName,
+          phone: formData.phone,
+          governorate: formData.governorate,
+          addressLine: formData.addressLine,
+          subServices: formData.subServices,
+          notes: formData.notes,
+        }),
       });
-      if (!res.ok) throw new Error("Submit failed");
+      if (res.status === 409) {
+        const data = await res.json().catch(() => ({}));
+        setSubmitError(data.error || t("validation.slotJustBooked"));
+        setTakenSlots((prev) => [...prev, formData.appointmentTime]);
+        update({ appointmentTime: "" });
+        setSubmitLoading(false);
+        return;
+      }
+      if (!res.ok) throw new Error("Book failed");
+      const emailBody = new FormData();
+      emailBody.append("_subject", "Exoterior – New booking request");
+      emailBody.append("_captcha", "false");
+      emailBody.append("Full Name", formData.fullName);
+      emailBody.append("Phone", formData.phone);
+      emailBody.append("Address", fullAddressDisplay);
+      emailBody.append("Appointment", `${formData.appointmentDate} at ${formData.appointmentTime}`);
+      emailBody.append("Services", formData.subServices.map((s) => tServices(`sub.${s}`)).join(", "));
+      emailBody.append("Notes", formData.notes);
+      await fetch(`https://formsubmit.co/${FORMSUBMIT_EMAIL}`, { method: "POST", body: emailBody });
       setSubmitted(true);
     } catch {
-      setSubmitError("Something went wrong. Please try again or contact us directly.");
+      setSubmitError(t("validation.submitFailed"));
     } finally {
       setSubmitLoading(false);
     }
@@ -463,47 +502,108 @@ export default function BookingForm() {
             </div>
           )}
 
-          {/* Step 3 */}
+          {/* Step 3 – Date & time: 1-hour slots, clear calendar UI */}
           {step === 3 && (
             <div className="space-y-6 text-start">
               <h3 className="text-lg font-semibold text-white text-start pb-1">
                 {t("step3")}
               </h3>
-              <p className="text-sm text-neutral-400">
+              <p className="text-sm text-neutral-400 text-start">
                 {t("appointmentDuration")}
               </p>
-              <a
-                href={GOOGLE_CALENDAR_APPOINTMENT_LINK}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="inline-flex min-h-[52px] items-center justify-center gap-2 rounded-xl bg-red-600 px-5 py-3.5 font-semibold text-white shadow-lg shadow-red-950/40 transition-all duration-200 hover:bg-red-500 active:scale-[0.98]"
-              >
-                {t("selectAppointment")}
-              </a>
-              <p className="text-xs text-neutral-500">
-                {t("selectAppointmentHelp")}
-              </p>
-              <label className="flex min-h-[48px] cursor-pointer items-center gap-3">
+
+              {/* Date: clear label + input */}
+              <div>
+                <label htmlFor="booking-date" className="block text-sm font-medium text-neutral-300 text-start">
+                  {t("pickDate")}
+                </label>
                 <input
-                  type="checkbox"
-                  checked={formData.appointmentConfirmed}
-                  onChange={(e) =>
-                    update({ appointmentConfirmed: e.target.checked })
+                  id="booking-date"
+                  type="date"
+                  value={formData.appointmentDate}
+                  onChange={(e) => update({ appointmentDate: e.target.value, appointmentTime: "" })}
+                  min={new Date().toISOString().slice(0, 10)}
+                  max={
+                    new Date(Date.now() + APPOINTMENT_DAYS_AHEAD * 24 * 60 * 60 * 1000)
+                      .toISOString()
+                      .slice(0, 10)
                   }
-                  className="h-5 w-5 shrink-0 rounded border-neutral-500 text-red-600"
+                  className="mt-1.5 min-h-[52px] w-full touch-manipulation rounded-xl border border-white/12 bg-white/5 px-4 py-3 text-base text-white transition-all duration-200 focus:border-red-500 focus:outline-none focus:ring-2 focus:ring-red-500/30 text-start [color-scheme:dark]"
+                  dir="ltr"
+                  aria-describedby={errors.appointmentDate ? "date-error" : undefined}
                 />
-                <span className="text-sm font-medium text-neutral-200">
-                  {t("iBookedAppointment")}
-                </span>
-              </label>
-              {errors.appointmentConfirmed && (
-                <p className="text-sm text-red-500">{errors.appointmentConfirmed}</p>
-              )}
-              <div className="rounded-xl border border-white/[0.12] bg-white/[0.04] p-4">
-                <p className="text-sm font-semibold text-neutral-200">
+                {formData.appointmentDate && (
+                  <p className="mt-2 text-sm text-neutral-400 text-start" aria-hidden>
+                    {new Date(formData.appointmentDate + "T12:00:00").toLocaleDateString(locale === "ar" ? "ar-EG" : "en-GB", {
+                      weekday: "long",
+                      day: "numeric",
+                      month: "long",
+                      year: "numeric",
+                    })}
+                  </p>
+                )}
+                {errors.appointmentDate && (
+                  <p id="date-error" className="mt-1 text-sm text-red-500 text-start">{errors.appointmentDate}</p>
+                )}
+              </div>
+
+              {/* Time: 1-hour slots, big tap targets */}
+              <div>
+                <label className="block text-sm font-medium text-neutral-300 text-start">
+                  {t("pickTime")}
+                </label>
+                {!formData.appointmentDate ? (
+                  <p className="mt-2 text-sm text-neutral-500 text-start">{t("pickDateFirst")}</p>
+                ) : (
+                  <>
+                    {slotsLoading && (
+                      <p className="mt-2 text-sm text-neutral-500 text-start">{t("loadingSlots")}</p>
+                    )}
+                    <div className="mt-2 grid grid-cols-2 gap-3 sm:grid-cols-4">
+                      {APPOINTMENT_TIME_SLOTS.map((slot) => {
+                        const taken = takenSlots.includes(slot);
+                        const selected = formData.appointmentTime === slot;
+                        const end = slotEndTime(slot);
+                        return (
+                          <button
+                            key={slot}
+                            type="button"
+                            disabled={taken || slotsLoading}
+                            onClick={() => !taken && update({ appointmentTime: slot })}
+                            className={`min-h-[52px] touch-manipulation rounded-xl border px-3 py-2.5 text-sm font-medium transition-all duration-200 active:scale-[0.98] ${
+                              taken
+                                ? "cursor-not-allowed border-white/10 bg-white/[0.02] text-neutral-500 line-through"
+                                : selected
+                                  ? "border-red-500 bg-red-600 text-white shadow-lg shadow-red-950/40"
+                                  : "border-white/12 bg-white/5 text-neutral-200 hover:border-red-500/50 hover:bg-red-950/30"
+                            }`}
+                          >
+                            <span className="block">{slot}</span>
+                            <span className={`block text-xs ${selected ? "text-red-200" : "text-neutral-500"}`}>
+                              {t("slotHour")} {end}
+                            </span>
+                            {taken && <span className="sr-only">{t("slotBooked")}</span>}
+                          </button>
+                        );
+                      })}
+                    </div>
+                    {formData.appointmentTime && (
+                      <p className="mt-3 rounded-lg bg-red-950/30 border border-red-500/30 px-3 py-2 text-sm font-medium text-red-300 text-start">
+                        {t("selectedSlot")}: {new Date(formData.appointmentDate + "T12:00:00").toLocaleDateString(locale === "ar" ? "ar-EG" : "en-GB", { day: "numeric", month: "short", year: "numeric" })} · {formData.appointmentTime} – {slotEndTime(formData.appointmentTime)} ({t("oneHour")})
+                      </p>
+                    )}
+                    {errors.appointmentTime && (
+                      <p className="mt-1 text-sm text-red-500 text-start">{errors.appointmentTime}</p>
+                    )}
+                  </>
+                )}
+              </div>
+
+              <div className="rounded-xl border border-white/12 bg-white/5 p-4">
+                <p className="text-sm font-semibold text-neutral-200 text-start">
                   {t("paymentMethods")}
                 </p>
-                <p className="mt-2 text-sm leading-relaxed text-neutral-400">
+                <p className="mt-2 text-sm leading-relaxed text-neutral-400 text-start">
                   {t("paymentMethodsDesc")}
                 </p>
               </div>
@@ -537,6 +637,14 @@ export default function BookingForm() {
                     </dd>
                   </div>
                 )}
+                <div>
+                  <dt className="text-neutral-500 text-start">{t("appointment")}</dt>
+                  <dd className="font-medium text-white text-start">
+                    {formData.appointmentDate && formData.appointmentTime
+                      ? `${formData.appointmentDate} – ${formData.appointmentTime}`
+                      : "—"}
+                  </dd>
+                </div>
               </dl>
               <p className="text-sm text-neutral-400 text-start">
                 {t("contactAfterSubmit")}
