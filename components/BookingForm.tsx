@@ -2,23 +2,16 @@
 
 import { useState } from "react";
 import { useTranslations, useLocale } from "next-intl";
-import {
-  MAIN_SERVICES,
-  SUB_SERVICES,
-  SUB_SERVICE_ESTIMATES,
-  type MainServiceId,
-} from "@/lib/services";
-import { EGYPT_PHONE_REGEX, GOOGLE_CALENDAR_APPOINTMENT_LINK, FORMSUBMIT_EMAIL } from "@/lib/constants";
+import { MAIN_SERVICES, SUB_SERVICES, type MainServiceId } from "@/lib/services";
+import { EGYPT_PHONE_REGEX, GOOGLE_CALENDAR_APPOINTMENT_LINK, FORMSUBMIT_EMAIL, GOVERNORATE_IDS } from "@/lib/constants";
 
 const STEPS = 4;
 
 type FormData = {
   fullName: string;
   phone: string;
-  street: string;
-  area: string;
-  city: string;
-  building: string;
+  governorate: string;
+  addressLine: string;
   subServices: string[];
   notes: string;
   appointmentConfirmed: boolean;
@@ -27,36 +20,48 @@ type FormData = {
 const initialFormData: FormData = {
   fullName: "",
   phone: "",
-  street: "",
-  area: "",
-  city: "",
-  building: "",
+  governorate: "",
+  addressLine: "",
   subServices: [],
   notes: "",
   appointmentConfirmed: false,
 };
 
-function formatFullAddress(data: { street: string; area: string; city: string; building: string }): string {
-  return [data.street, data.area, data.city, data.building].filter(Boolean).join(", ") || "";
-}
-
 type Errors = Partial<Record<keyof FormData, string>>;
 
-function getEstimatedRange(subServiceIds: string[]): [number, number] | null {
-  if (subServiceIds.length === 0) return null;
-  let min = 0;
-  let max = 0;
-  for (const id of subServiceIds) {
-    const range = SUB_SERVICE_ESTIMATES[id];
-    if (range) {
-      min += range[0];
-      max += range[1];
-    }
-  }
-  return min && max ? [min, max] : null;
-}
+type GeocodedAddress = { governorate: string; addressLine: string };
 
-type GeocodedAddress = { street: string; area: string; city: string };
+const GOVERNORATE_MATCH: Record<string, string> = {
+  cairo: "cairo", القاهرة: "cairo", "al qahirah": "cairo",
+  giza: "giza", الجيزة: "giza",
+  alexandria: "alexandria", الإسكندرية: "alexandria",
+  dakahlia: "dakahlia", الدقهلية: "dakahlia",
+  "red sea": "red_sea", "red sea governorate": "red_sea",
+  beheira: "beheira", البحيرة: "beheira",
+  fayoum: "fayoum", الفيوم: "fayoum",
+  gharbia: "gharbia", الغربية: "gharbia",
+  ismailia: "ismailia", الإسماعيلية: "ismailia",
+  menoufia: "menoufia", المنوفية: "menoufia",
+  minya: "minya", المنيا: "minya",
+  qalyubia: "qalyubia", القليوبية: "qalyubia",
+  qena: "qena", sohag: "sohag", سوهاج: "sohag",
+  "beni suef": "beni_suef", "bani suwayf": "beni_suef",
+  aswan: "aswan", أسوان: "aswan",
+  asyut: "asyut", أسيوط: "asyut", assiut: "asyut",
+  damietta: "damietta", دمياط: "damietta",
+  "kafr el sheikh": "kafr_el_sheikh", "kafr el-sheikh": "kafr_el_sheikh",
+  luxor: "luxor", الأقصر: "luxor",
+  matrouh: "matrouh", مطروح: "matrouh",
+  "new valley": "new_valley", "al wadi al jadid": "new_valley",
+  "north sinai": "north_sinai", "port said": "port_said", بورسعيد: "port_said",
+  "south sinai": "south_sinai", suez: "suez", السويس: "suez",
+};
+
+function matchGovernorate(name: string): string {
+  if (!name) return "";
+  const key = name.toLowerCase().trim();
+  return GOVERNORATE_MATCH[key] || "";
+}
 
 async function reverseGeocode(lat: number, lon: number): Promise<GeocodedAddress> {
   const url = `https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lon}&zoom=18&addressdetails=1`;
@@ -66,10 +71,15 @@ async function reverseGeocode(lat: number, lon: number): Promise<GeocodedAddress
   if (!res.ok) throw new Error("Geocoding failed");
   const data = await res.json();
   const a = data.address || {};
+  const state = (a.state || a.county || "").toString();
+  const city = (a.city || a.town || a.village || "").toString();
+  const governorateId = matchGovernorate(state) || matchGovernorate(city);
+  const streetPart = [a.road, a.house_number].filter(Boolean).join(" ");
+  const areaPart = a.suburb || a.neighbourhood || a.city_district || "";
+  const addressLine = [streetPart, areaPart, city].filter(Boolean).join(", ") || data.display_name || "";
   return {
-    street: [a.road, a.house_number].filter(Boolean).join(" ") || "",
-    area: a.suburb || a.neighbourhood || a.city_district || "",
-    city: a.city || a.town || a.state || "",
+    governorate: governorateId || state || city,
+    addressLine: addressLine || state || city,
   };
 }
 
@@ -103,9 +113,8 @@ export default function BookingForm() {
     if (!formData.phone.trim()) e.phone = t("validation.phoneRequired");
     else if (!EGYPT_PHONE_REGEX.test(formData.phone.replace(/\s/g, "")))
       e.phone = t("validation.phoneInvalid");
-    if (!formData.street.trim()) e.street = t("validation.addressRequired");
-    if (!formData.area.trim()) e.area = t("validation.addressRequired");
-    if (!formData.city.trim()) e.city = t("validation.addressRequired");
+    if (!formData.governorate.trim()) e.governorate = t("validation.addressRequired");
+    if (!formData.addressLine.trim()) e.addressLine = t("validation.addressRequired");
     setErrors(e);
     return Object.keys(e).length === 0;
   };
@@ -144,11 +153,14 @@ export default function BookingForm() {
     navigator.geolocation.getCurrentPosition(
       async (pos) => {
         try {
-          const { street, area, city } = await reverseGeocode(
+          const { governorate: gov, addressLine: line } = await reverseGeocode(
             pos.coords.latitude,
             pos.coords.longitude
           );
-          update({ street, area, city });
+          update({
+            governorate: GOVERNORATE_IDS.includes(gov as typeof GOVERNORATE_IDS[number]) ? gov : formData.governorate,
+            addressLine: line || formData.addressLine,
+          });
         } catch {
           setLocationError("Could not get address");
         } finally {
@@ -176,24 +188,25 @@ export default function BookingForm() {
     setExpandedCategory((prev) => (prev === id ? null : id));
   };
 
-  const fullAddress = formatFullAddress(formData);
-
-  const estimate = getEstimatedRange(formData.subServices);
+  const governorateLabel = formData.governorate
+    ? (GOVERNORATE_IDS.includes(formData.governorate as (typeof GOVERNORATE_IDS)[number])
+        ? t(`governorates.${formData.governorate}`)
+        : formData.governorate)
+    : "";
+  const fullAddressDisplay = [governorateLabel, formData.addressLine].filter(Boolean).join(", ");
 
   const handleSubmit = async () => {
     if (step !== STEPS) return;
     setSubmitError(null);
     setSubmitLoading(true);
-    const [min, max] = estimate || [0, 0];
     const body = new FormData();
     body.append("_subject", "Exoterior – New booking request");
     body.append("_captcha", "false");
     body.append("Full Name", formData.fullName);
     body.append("Phone", formData.phone);
-    body.append("Address", fullAddress);
+    body.append("Address", fullAddressDisplay);
     body.append("Services", formData.subServices.map((s) => tServices(`sub.${s}`)).join(", "));
     body.append("Notes", formData.notes);
-    body.append("Estimated Cost", `${min} - ${max} EGP`);
     try {
       const res = await fetch(`https://formsubmit.co/${FORMSUBMIT_EMAIL}`, {
         method: "POST",
@@ -294,81 +307,73 @@ export default function BookingForm() {
               </div>
               <div>
                 <label className="block text-sm font-medium text-neutral-300 text-start">
-                  {t("street")}
+                  {t("governorate")}
                 </label>
-                <input
-                  type="text"
-                  value={formData.street}
-                  onChange={(e) => update({ street: e.target.value })}
-                  placeholder={t("streetPlaceholder")}
-                  className="mt-1.5 min-h-[48px] w-full touch-manipulation rounded-xl border border-white/[0.12] bg-white/[0.04] px-4 py-3 text-base text-white placeholder:text-neutral-500 transition-all duration-200 focus:border-red-500 focus:outline-none focus:ring-2 focus:ring-red-500/30 text-start"
+                <select
+                  value={formData.governorate}
+                  onChange={(e) => update({ governorate: e.target.value })}
+                  className="mt-1.5 min-h-[48px] w-full touch-manipulation appearance-none rounded-xl border border-white/[0.12] bg-white/[0.04] px-4 py-3 text-base text-white transition-all duration-200 focus:border-red-500 focus:outline-none focus:ring-2 focus:ring-red-500/30 text-start [&>option]:bg-neutral-900 [&>option]:text-white"
                   dir={isAr ? "rtl" : "ltr"}
-                />
-                {errors.street && (
-                  <p className="mt-1 text-sm text-red-500 text-start">{errors.street}</p>
-                )}
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-neutral-300 text-start">
-                  {t("area")}
-                </label>
-                <input
-                  type="text"
-                  value={formData.area}
-                  onChange={(e) => update({ area: e.target.value })}
-                  placeholder={t("areaPlaceholder")}
-                  className="mt-1.5 min-h-[48px] w-full touch-manipulation rounded-xl border border-white/[0.12] bg-white/[0.04] px-4 py-3 text-base text-white placeholder:text-neutral-500 transition-all duration-200 focus:border-red-500 focus:outline-none focus:ring-2 focus:ring-red-500/30 text-start"
-                  dir={isAr ? "rtl" : "ltr"}
-                />
-                {errors.area && (
-                  <p className="mt-1 text-sm text-red-500 text-start">{errors.area}</p>
-                )}
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-neutral-300 text-start">
-                  {t("city")}
-                </label>
-                <input
-                  type="text"
-                  value={formData.city}
-                  onChange={(e) => update({ city: e.target.value })}
-                  placeholder={t("cityPlaceholder")}
-                  className="mt-1.5 min-h-[48px] w-full touch-manipulation rounded-xl border border-white/[0.12] bg-white/[0.04] px-4 py-3 text-base text-white placeholder:text-neutral-500 transition-all duration-200 focus:border-red-500 focus:outline-none focus:ring-2 focus:ring-red-500/30 text-start"
-                  dir={isAr ? "rtl" : "ltr"}
-                />
-                {errors.city && (
-                  <p className="mt-1 text-sm text-red-500 text-start">{errors.city}</p>
-                )}
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-neutral-300 text-start">
-                  {t("building")}
-                </label>
-                <input
-                  type="text"
-                  value={formData.building}
-                  onChange={(e) => update({ building: e.target.value })}
-                  placeholder={t("buildingPlaceholder")}
-                  className="mt-1.5 min-h-[48px] w-full touch-manipulation rounded-xl border border-white/[0.12] bg-white/[0.04] px-4 py-3 text-base text-white placeholder:text-neutral-500 transition-all duration-200 focus:border-red-500 focus:outline-none focus:ring-2 focus:ring-red-500/30 text-start"
-                  dir={isAr ? "rtl" : "ltr"}
-                />
-              </div>
-              <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between rtl:sm:flex-row-reverse">
-                <p className="text-sm font-medium text-neutral-400 text-start">
-                  {t("fullAddress")}: <span className="font-normal text-neutral-300">{fullAddress || "—"}</span>
-                </p>
-                <button
-                  type="button"
-                  onClick={handleUseLocation}
-                  disabled={locationLoading}
-                  className="min-h-[48px] shrink-0 touch-manipulation rounded-xl border border-white/[0.12] bg-white/[0.06] px-4 py-3 text-sm font-medium text-neutral-300 transition-all duration-200 hover:border-white/20 hover:bg-white/[0.08] active:scale-[0.98] disabled:opacity-50 text-start"
                 >
-                  {locationLoading ? "…" : t("useMyLocation")}
-                </button>
+                  <option value="">{t("governoratePlaceholder")}</option>
+                  {GOVERNORATE_IDS.map((id) => (
+                    <option key={id} value={id}>
+                      {t(`governorates.${id}`)}
+                    </option>
+                  ))}
+                </select>
+                {errors.governorate && (
+                  <p className="mt-1 text-sm text-red-500 text-start">{errors.governorate}</p>
+                )}
               </div>
-              {locationError && (
-                <p className="mt-1 text-sm text-amber-500 text-start">{locationError}</p>
-              )}
+              <div>
+                <label className="block text-sm font-medium text-neutral-300 text-start">
+                  {t("fullAddress")}
+                </label>
+                <input
+                  type="text"
+                  value={formData.addressLine}
+                  onChange={(e) => update({ addressLine: e.target.value })}
+                  placeholder={t("fullAddressPlaceholder")}
+                  className="mt-1.5 min-h-[48px] w-full touch-manipulation rounded-xl border border-white/[0.12] bg-white/[0.04] px-4 py-3 text-base text-white placeholder:text-neutral-500 transition-all duration-200 focus:border-red-500 focus:outline-none focus:ring-2 focus:ring-red-500/30 text-start"
+                  dir={isAr ? "rtl" : "ltr"}
+                />
+                {errors.addressLine && (
+                  <p className="mt-1 text-sm text-red-500 text-start">{errors.addressLine}</p>
+                )}
+              </div>
+
+              {/* Use my location – map-style card */}
+              <div className="relative overflow-hidden rounded-2xl border border-white/[0.1] bg-gradient-to-br from-neutral-900/80 to-neutral-950/90 p-0">
+                <div className="absolute inset-0 bg-[linear-gradient(135deg,transparent_0%,rgba(220,38,38,0.06)_50%,transparent_100%)] pointer-events-none" aria-hidden />
+                <div className="relative flex flex-col sm:flex-row sm:items-center gap-4 p-5 sm:p-6">
+                  <div className="flex shrink-0 items-center justify-center rounded-xl bg-red-950/40 p-4 ring-1 ring-red-500/20">
+                    <svg className="w-10 h-10 text-red-500 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden>
+                      <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z" />
+                      <circle cx="12" cy="10" r="3" />
+                    </svg>
+                  </div>
+                  <div className="flex-1 min-w-0 text-start">
+                    <h4 className="font-semibold text-white">
+                      {t("useMyLocationTitle")}
+                    </h4>
+                    <p className="mt-1 text-sm text-neutral-400">
+                      {t("useMyLocationDesc")}
+                    </p>
+                    {locationError && (
+                      <p className="mt-2 text-sm text-amber-500">{locationError}</p>
+                    )}
+                  </div>
+                  <button
+                    type="button"
+                    onClick={handleUseLocation}
+                    disabled={locationLoading}
+                    className="shrink-0 min-h-[48px] touch-manipulation rounded-xl bg-red-600 px-5 py-3 text-sm font-semibold text-white shadow-lg shadow-red-950/40 transition-all duration-200 hover:bg-red-500 active:scale-[0.98] disabled:opacity-60 disabled:pointer-events-none"
+                  >
+                    {locationLoading ? t("useMyLocationDetecting") : t("useMyLocation")}
+                  </button>
+                </div>
+              </div>
             </div>
           )}
 
@@ -484,22 +489,14 @@ export default function BookingForm() {
               {errors.appointmentConfirmed && (
                 <p className="text-sm text-red-500">{errors.appointmentConfirmed}</p>
               )}
-              {estimate && (
-                <div className="rounded-xl border border-white/[0.12] bg-white/[0.04] p-4">
-                  <p className="text-sm font-medium text-neutral-300">
-                    {t("estimatedCost")}
-                  </p>
-                  <p className="mt-1 text-lg font-semibold text-red-400">
-                    {t("estimatedCostRange", {
-                      min: estimate[0],
-                      max: estimate[1],
-                    })}
-                  </p>
-                </div>
-              )}
-              <p className="text-sm text-neutral-400">
-                {t("paymentMethod")}
-              </p>
+              <div className="rounded-xl border border-white/[0.12] bg-white/[0.04] p-4">
+                <p className="text-sm font-semibold text-neutral-200">
+                  {t("paymentMethods")}
+                </p>
+                <p className="mt-2 text-sm leading-relaxed text-neutral-400">
+                  {t("paymentMethodsDesc")}
+                </p>
+              </div>
             </div>
           )}
 
@@ -520,21 +517,13 @@ export default function BookingForm() {
                 </div>
                 <div>
                   <dt className="text-neutral-500 text-start">{t("fullAddress")}</dt>
-                  <dd className="font-medium text-white text-start">{fullAddress || "—"}</dd>
+                  <dd className="font-medium text-white text-start">{fullAddressDisplay || "—"}</dd>
                 </div>
                 {formData.subServices.length > 0 && (
                   <div>
                     <dt className="text-neutral-500 text-start">{t("subServices")}</dt>
                     <dd className="font-medium text-white text-start">
                       {formData.subServices.map((s) => tServices(`sub.${s}`)).join(", ")}
-                    </dd>
-                  </div>
-                )}
-                {estimate && (
-                  <div>
-                    <dt className="text-neutral-500 text-start">{t("estimatedCost")}</dt>
-                    <dd className="font-medium text-red-400 text-start">
-                      {t("estimatedCostRange", { min: estimate[0], max: estimate[1] })}
                     </dd>
                   </div>
                 )}
