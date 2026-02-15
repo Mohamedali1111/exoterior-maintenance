@@ -1,37 +1,48 @@
 # Hero background video
 
-The hero section uses a background video for impact. You can provide it in either way below.
+The hero section uses a background video so the site feels real and professional. Use a clip that matches **home & office maintenance** (AC, plumbing, electrical, cleaning, handyman).
 
 ## Option 1: Local file (recommended)
 
-1. Download a free **engineering / building / construction** video (e.g. builders, workers, tools, welding, carpentry, construction site).
-2. Rename it to **`hero-bg.mp4`** and place it in this folder: `public/videos/hero-bg.mp4`.
+1. Download a **free** clip that fits your services (see suggestions below).
+2. Rename it to **`hero-bg.mp4`** and put it here: `public/videos/hero-bg.mp4`.
 
-**Suggested sources (free, no watermark):**
+**Best search terms for a real, service-focused feel:**
 
-- **Mixkit** – Carpenter, tools, construction, drilling, welding:  
-  https://mixkit.co/free-stock-video/tools/  
-  https://mixkit.co/free-stock-video/construction/  
-  e.g. "A carpenter working at his workshop", "Drilling holes into wood", "Welding by hand"
-- **Pexels** – Search “maintenance”, “plumber”, “technician”, “repair”:  
-  https://www.pexels.com/search/videos/construction/  
-  https://www.pexels.com/search/videos/engineering/
-- **Coverr** – Engineering, construction:  
-  https://coverr.co/stock-video-footage/engineering  
-  https://coverr.co/stock-video-footage/construction
+- **Handyman / technician:** "handyman", "technician at work", "maintenance worker", "repair service"
+- **AC / HVAC:** "HVAC technician", "air conditioning repair", "technician fixing AC"
+- **Plumbing / electrical:** "plumber", "electrician", "wiring", "pipe repair"
+- **General:** "home maintenance", "building maintenance", "property repair", "tool repair"
+- **Atmosphere:** "worker with tools", "professional technician", "service call", "before and after repair"
 
-Use a horizontal clip (landscape), ideally 10–30 seconds, so it can loop smoothly.
+Use a **landscape** clip, about **10–30 seconds**, so it loops smoothly. Prefer well-lit, professional shots over chaotic construction sites.
+
+### Free stock video sites (no watermark)
+
+| Site | Try these searches |
+|------|---------------------|
+| **Pexels** | [maintenance](https://www.pexels.com/search/videos/maintenance/), [technician](https://www.pexels.com/search/videos/technician/), [plumber](https://www.pexels.com/search/videos/plumber/), [electrician](https://www.pexels.com/search/videos/electrician/), [HVAC](https://www.pexels.com/search/videos/hvac/), [handyman](https://www.pexels.com/search/videos/handyman/) |
+| **Pixabay** | [repair](https://pixabay.com/videos/search/repair/), [technician](https://pixabay.com/videos/search/technician/), [plumbing](https://pixabay.com/videos/search/plumbing/) |
+| **Mixkit** | [tools](https://mixkit.co/free-stock-video/tools/), [construction](https://mixkit.co/free-stock-video/construction/), [worker](https://mixkit.co/free-stock-video/worker/) |
+| **Coverr** | [engineering](https://coverr.co/stock-video-footage/engineering), [construction](https://coverr.co/stock-video-footage/construction) |
+
+Pick something that looks **real** (actual technicians, tools, or repairs) rather than generic construction.
 
 ## Option 2: External URL
 
-If you have a direct MP4 URL (e.g. from a CDN or storage), set:
+If your video is hosted elsewhere (CDN, storage), set in `.env.local`:
 
 ```env
 NEXT_PUBLIC_HERO_VIDEO_URL=https://example.com/your-video.mp4
 ```
 
-in `.env.local`. The hero will use this URL instead of the local file.
+The hero will use this URL instead of the local file.
 
-## Optional: poster image
+## Optional: poster image (recommended for fast load)
 
-To show a frame before the video loads, add `public/videos/hero-poster.jpg` and the component can be updated to use it as the video `poster`.
+The hero **waits for the page to load** before loading the video, so the site feels fast. To show a nice frame **right away**:
+
+1. Export one frame from your video (or use a similar photo).
+2. Save it as **`hero-poster.jpg`** in this folder: `public/videos/hero-poster.jpg` (keep it under ~200 KB).
+
+The hero uses this as the video poster. Use a landscape image (e.g. 1920×1080 or 16:9). For even faster load, compress the main video (e.g. 720p, 1–2 Mbps) so it streams quickly.

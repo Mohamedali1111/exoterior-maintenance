@@ -69,6 +69,8 @@ Booking submissions are sent to **your email** via [FormSubmit](https://formsubm
 
 After that, every booking (name, phone, address, appointment date/time, services, notes) is emailed to you.
 
+**Send to two addresses (e.g. Exoterior + Mohamed Ali):** set `NEXT_PUBLIC_FORMSUBMIT_EMAIL` to the main address and `NEXT_PUBLIC_FORMSUBMIT_EMAIL_SECONDARY` to the second. Both receive the same email. Activate each address once via FormSubmit’s link.
+
 ## How to enable Supabase (slot blocking)
 
 Supabase stores bookings and blocks the same time slot for two people. Follow these steps:
@@ -133,6 +135,7 @@ The app is ready to deploy on Vercel. No code edits needed.
 1. Push your repo and import the project in [Vercel](https://vercel.com).
 2. In the project **Settings → Environment Variables**, add:
    - **Required:** `NEXT_PUBLIC_FORMSUBMIT_EMAIL` = your email (so form submissions go to you).
+   - **Optional:** `NEXT_PUBLIC_FORMSUBMIT_EMAIL_SECONDARY` = second recipient (e.g. Mohamed Ali); both get every booking.
    - **Optional (for slot blocking):** `NEXT_PUBLIC_SUPABASE_URL` and `SUPABASE_SERVICE_ROLE_KEY`.
 3. Redeploy.
 

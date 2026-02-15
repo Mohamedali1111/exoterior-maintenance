@@ -2,7 +2,7 @@
 
 import Image from "next/image";
 import { useTranslations } from "next-intl";
-import { useRef, useEffect } from "react";
+import { useRef, useEffect, useState } from "react";
 
 const HERO_VIDEO_SRC =
   typeof process.env.NEXT_PUBLIC_HERO_VIDEO_URL === "string" &&
@@ -10,21 +10,39 @@ const HERO_VIDEO_SRC =
     ? process.env.NEXT_PUBLIC_HERO_VIDEO_URL
     : "/videos/hero-bg.mp4";
 
+/** Optional: show this image until the video plays. Add public/videos/hero-poster.jpg for instant hero. */
+const HERO_VIDEO_POSTER = "/videos/hero-poster.jpg";
+
 export default function Hero() {
   const t = useTranslations("hero");
   const videoRef = useRef<HTMLVideoElement>(null);
+  const [videoReady, setVideoReady] = useState(false);
+  // Defer loading the video until after page is ready so initial load is fast
+  const [videoSrc, setVideoSrc] = useState<string>("");
 
-  // Force play on mount and when visible again (e.g. after client-side nav) – no controls
+  useEffect(() => {
+    const startLoadingVideo = () => setVideoSrc(HERO_VIDEO_SRC);
+    if (typeof document === "undefined") return;
+    if (document.readyState === "complete") {
+      startLoadingVideo();
+    } else {
+      window.addEventListener("load", startLoadingVideo);
+      return () => window.removeEventListener("load", startLoadingVideo);
+    }
+  }, []);
+
+  // Force play when video is loaded and when visible again
   useEffect(() => {
     const video = videoRef.current;
-    if (!video) return;
+    if (!video || !videoSrc) return;
 
     const play = () => {
       video.muted = true;
       video.play().catch(() => {});
     };
 
-    play();
+    if (video.readyState >= 2) play();
+    else video.addEventListener("loadeddata", play, { once: true });
 
     const observer = new IntersectionObserver(
       (entries) => {
@@ -37,24 +55,30 @@ export default function Hero() {
     observer.observe(video);
 
     return () => observer.disconnect();
-  }, []);
+  }, [videoSrc]);
 
   return (
     <section className="relative min-h-[45vh] overflow-hidden border-b-4 border-red-600 px-3 pb-12 pt-10 sm:min-h-[55vh] sm:px-4 sm:pb-20 sm:pt-14 md:min-h-[65vh] md:pb-28 md:pt-20">
-      <div className="absolute inset-0">
+      {/* Video layer: full bleed, perfect fit. Video loads after page so site feels fast. */}
+      <div className="absolute inset-0 min-h-full min-w-full">
         <video
           ref={videoRef}
           autoPlay
           muted
           loop
           playsInline
-          preload="auto"
+          preload="metadata"
+          poster={HERO_VIDEO_POSTER}
           disablePictureInPicture
           disableRemotePlayback
-          className="h-full w-full object-cover [object-position:center_center] pointer-events-none"
-          style={{ background: "#0a0a0a" }}
+          onCanPlay={() => setVideoReady(true)}
+          className="absolute inset-0 h-full w-full min-h-full min-w-full object-cover object-center pointer-events-none transition-opacity duration-500"
+          style={{
+            background: "#0a0a0a",
+            opacity: videoReady ? 1 : 0,
+          }}
           aria-hidden
-          src={HERO_VIDEO_SRC}
+          src={videoSrc}
         />
       </div>
       {/* Overlays: darken video so text stays readable and blend with page */}

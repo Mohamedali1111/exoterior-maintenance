@@ -3,11 +3,24 @@ import dynamic from "next/dynamic";
 import Nav from "@/components/Nav";
 import Hero from "@/components/Hero";
 import Footer from "@/components/Footer";
+import SectionSkeleton from "@/components/SectionSkeleton";
 
-const ServicesOverview = dynamic(() => import("@/components/ServicesOverview"), { ssr: true });
-const WhyExoterior = dynamic(() => import("@/components/WhyExoterior"), { ssr: true });
-const HowItWorks = dynamic(() => import("@/components/HowItWorks"), { ssr: true });
-const BookingForm = dynamic(() => import("@/components/BookingForm"), { ssr: true });
+const ServicesOverview = dynamic(() => import("@/components/ServicesOverview"), {
+  ssr: true,
+  loading: () => <SectionSkeleton />,
+});
+const WhyExoterior = dynamic(() => import("@/components/WhyExoterior"), {
+  ssr: true,
+  loading: () => <SectionSkeleton />,
+});
+const HowItWorks = dynamic(() => import("@/components/HowItWorks"), {
+  ssr: true,
+  loading: () => <SectionSkeleton />,
+});
+const BookingForm = dynamic(() => import("@/components/BookingForm"), {
+  ssr: true,
+  loading: () => <SectionSkeleton />,
+});
 
 type Props = { params: Promise<{ locale: string }> };
 

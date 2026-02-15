@@ -4,6 +4,13 @@ export const FORMSUBMIT_EMAIL =
     ? process.env.NEXT_PUBLIC_FORMSUBMIT_EMAIL
     : "your-email@example.com";
 
+/** Optional second recipient (e.g. Mohamed Ali). Set NEXT_PUBLIC_FORMSUBMIT_EMAIL_SECONDARY to also send form to this address. */
+export const FORMSUBMIT_EMAIL_SECONDARY =
+  typeof process.env.NEXT_PUBLIC_FORMSUBMIT_EMAIL_SECONDARY === "string" &&
+  process.env.NEXT_PUBLIC_FORMSUBMIT_EMAIL_SECONDARY.length > 0
+    ? process.env.NEXT_PUBLIC_FORMSUBMIT_EMAIL_SECONDARY
+    : null;
+
 /** Egypt mobile: 01 + 9 digits */
 export const EGYPT_PHONE_REGEX = /^01[0-9]{9}$/;
 

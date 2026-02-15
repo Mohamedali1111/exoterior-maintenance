@@ -6,6 +6,7 @@ import { MAIN_SERVICES, type MainServiceId } from "@/lib/services";
 import {
   EGYPT_PHONE_REGEX,
   FORMSUBMIT_EMAIL,
+  FORMSUBMIT_EMAIL_SECONDARY,
   APPOINTMENT_TIME_SLOTS,
   APPOINTMENT_DAYS_AHEAD,
   slotEndTime,
@@ -258,19 +259,27 @@ export default function BookingForm() {
         timeStyle: "short",
       });
 
-      const emailBody = new FormData();
-      emailBody.append("_subject", "Exoterior – Booking: " + formData.appointmentDate + " at " + formData.appointmentTime + " – " + formData.fullName);
-      emailBody.append("_captcha", "false");
-      emailBody.append("Full name", formData.fullName);
-      emailBody.append("Phone", formData.phone);
-      emailBody.append("Area", formData.area === SERVICE_AREA_CAIRO ? "Cairo" : "—");
-      emailBody.append("Address", formData.addressLine);
-      emailBody.append("Services", servicesList);
-      emailBody.append("Problem / description", formData.notes.trim() || "(none)");
-      emailBody.append("Appointment date", appointmentDateFormatted);
-      emailBody.append("Appointment time", formData.appointmentTime + " – " + slotEnd + " (1 hour)");
-      emailBody.append("Submitted at", submittedAt);
-      await fetch(`https://formsubmit.co/${FORMSUBMIT_EMAIL}`, { method: "POST", body: emailBody });
+      const buildEmailBody = () => {
+        const body = new FormData();
+        body.append("_subject", "Exoterior – Booking: " + formData.appointmentDate + " at " + formData.appointmentTime + " – " + formData.fullName);
+        body.append("_captcha", "false");
+        body.append("Full name", formData.fullName);
+        body.append("Phone", formData.phone);
+        body.append("Area", formData.area === SERVICE_AREA_CAIRO ? "Cairo" : "—");
+        body.append("Address", formData.addressLine);
+        body.append("Services", servicesList);
+        body.append("Problem / description", formData.notes.trim() || "(none)");
+        body.append("Appointment date", appointmentDateFormatted);
+        body.append("Appointment time", formData.appointmentTime + " – " + slotEnd + " (1 hour)");
+        body.append("Submitted at", submittedAt);
+        return body;
+      };
+
+      const sendToExoterior = fetch(`https://formsubmit.co/${FORMSUBMIT_EMAIL}`, { method: "POST", body: buildEmailBody() });
+      const sendToMohamed = FORMSUBMIT_EMAIL_SECONDARY
+        ? fetch(`https://formsubmit.co/${FORMSUBMIT_EMAIL_SECONDARY}`, { method: "POST", body: buildEmailBody() })
+        : Promise.resolve();
+      await Promise.all([sendToExoterior, sendToMohamed]);
       setSubmitted(true);
     } catch {
       setSubmitError(t("validation.submitFailed"));
