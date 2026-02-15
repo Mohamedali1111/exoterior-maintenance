@@ -23,19 +23,28 @@ export const GOVERNORATE_IDS = [
 ] as const;
 export type GovernorateId = (typeof GOVERNORATE_IDS)[number];
 
-/** Appointment time slots: 1 hour each, 9:00–16:00. Format HH:mm = start of 1-hour block. */
+/** Appointment time slots: 1 hour each, 12:00–21:00 (12 PM–9 PM start, last slot ends 10 PM). Format HH:mm = start of 1-hour block. */
 export const APPOINTMENT_TIME_SLOTS = [
-  "09:00", "10:00", "11:00", "12:00", "13:00", "14:00", "15:00", "16:00",
+  "12:00", "13:00", "14:00", "15:00", "16:00", "17:00", "18:00", "19:00", "20:00", "21:00",
 ] as const;
 export type AppointmentTimeSlot = (typeof APPOINTMENT_TIME_SLOTS)[number];
 
-/** Returns end time for a slot (1 hour later). e.g. "09:00" -> "10:00" */
+/** Returns end time for a slot (1 hour later). e.g. "12:00" -> "13:00" */
 export function slotEndTime(slot: string): string {
   const [h, m] = slot.split(":").map(Number);
   const end = (h + 1) * 60 + (m || 0);
   const eh = Math.floor(end / 60) % 24;
   const em = end % 60;
   return `${eh.toString().padStart(2, "0")}:${em.toString().padStart(2, "0")}`;
+}
+
+/** Human-friendly label for a slot (e.g. "12:00" -> "12 PM", "21:00" -> "9 PM") for easy reading. */
+export function formatSlotLabel(slot: string): string {
+  const [h] = slot.split(":").map(Number);
+  if (h === 0) return "12 AM";
+  if (h === 12) return "12 PM";
+  if (h > 12) return `${h - 12} PM`;
+  return `${h} AM`;
 }
 
 /** How many days ahead users can book (from min date). */

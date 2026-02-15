@@ -10,6 +10,7 @@ import {
   APPOINTMENT_TIME_SLOTS,
   APPOINTMENT_DAYS_AHEAD,
   slotEndTime,
+  formatSlotLabel,
   getMinBookingDateStr,
   SERVICE_AREA_CAIRO,
   SERVICE_AREA_OTHER,
@@ -261,7 +262,7 @@ export default function BookingForm() {
 
       const buildEmailBody = () => {
         const body = new FormData();
-        body.append("_subject", "Exoterior – Booking: " + formData.appointmentDate + " at " + formData.appointmentTime + " – " + formData.fullName);
+        body.append("_subject", "Exoterior – Booking: " + formData.appointmentDate + " at " + formatSlotLabel(formData.appointmentTime) + " – " + formData.fullName);
         body.append("_captcha", "false");
         body.append("Full name", formData.fullName);
         body.append("Phone", formData.phone);
@@ -270,7 +271,7 @@ export default function BookingForm() {
         body.append("Services", servicesList);
         body.append("Problem / description", formData.notes.trim() || "(none)");
         body.append("Appointment date", appointmentDateFormatted);
-        body.append("Appointment time", formData.appointmentTime + " – " + slotEnd + " (1 hour)");
+        body.append("Appointment time", formatSlotLabel(formData.appointmentTime) + " – " + formatSlotLabel(slotEnd) + " (1 hour)");
         body.append("Submitted at", submittedAt);
         return body;
       };
@@ -515,7 +516,7 @@ export default function BookingForm() {
               </h3>
               <p className="text-xs sm:text-sm text-neutral-400 text-start">
                 {t("appointmentDuration")}
-                {getMinBookingDateStr() === "2025-02-25" ? ` ${t("bookingOpensFrom")}` : ""}
+                {(() => { const min = getMinBookingDateStr(); return min === "2025-02-25" || min === "2026-02-25"; })() ? ` ${t("bookingOpensFrom")}` : ""}
               </p>
 
               {formData.appointmentDate && slotStorageActive === false && (
@@ -573,18 +574,19 @@ export default function BookingForm() {
                     {slotsLoading && (
                       <p className="mt-1.5 text-xs text-neutral-500 text-start">{t("loadingSlots")}</p>
                     )}
-                    <div className="mt-1.5 grid grid-cols-4 gap-1.5 sm:gap-2 sm:grid-cols-4">
+                    <p className="mt-1 text-xs text-neutral-500 text-start mb-1.5">{t("pickTimeHint")}</p>
+                    <div className="mt-1.5 grid grid-cols-2 gap-2 sm:grid-cols-5 sm:gap-2">
                       {APPOINTMENT_TIME_SLOTS.map((slot) => {
                         const taken = takenSlots.includes(slot);
                         const selected = formData.appointmentTime === slot;
-                        const end = slotEndTime(slot);
+                        const endLabel = formatSlotLabel(slotEndTime(slot));
                         return (
                           <button
                             key={slot}
                             type="button"
                             disabled={taken || slotsLoading}
                             onClick={() => !taken && update({ appointmentTime: slot })}
-                            className={`min-h-[42px] sm:min-h-[48px] touch-manipulation rounded-lg sm:rounded-xl border px-2 py-2 sm:px-3 sm:py-2.5 text-xs sm:text-sm font-medium transition-all duration-200 active:scale-[0.98] min-w-0 ${
+                            className={`min-h-[44px] sm:min-h-[48px] touch-manipulation rounded-xl border px-3 py-2.5 text-sm font-medium transition-all duration-200 active:scale-[0.98] min-w-0 ${
                               taken
                                 ? "cursor-not-allowed border-white/10 bg-white/2 text-neutral-500 line-through"
                                 : selected
@@ -592,9 +594,9 @@ export default function BookingForm() {
                                   : "border-white/12 bg-white/5 text-neutral-200 hover:border-red-500/50 hover:bg-red-950/30"
                             }`}
                           >
-                            <span className="block truncate">{slot}</span>
-                            <span className={`block truncate text-[10px] sm:text-xs ${selected ? "text-red-200" : "text-neutral-500"}`}>
-                              {t("slotHour")} {end}
+                            <span className="block truncate">{formatSlotLabel(slot)}</span>
+                            <span className={`block truncate text-xs ${selected ? "text-red-200" : "text-neutral-500"}`}>
+                              {t("slotUntil")} {endLabel}
                             </span>
                             {taken && <span className="sr-only">{t("slotBooked")}</span>}
                           </button>
@@ -603,7 +605,7 @@ export default function BookingForm() {
                     </div>
                     {formData.appointmentTime && (
                       <p className="mt-2 rounded-lg bg-red-950/30 border border-red-500/30 px-2.5 py-2 text-xs font-medium text-red-300 text-start break-words">
-                        {t("selectedSlot")}: {new Date(formData.appointmentDate + "T12:00:00").toLocaleDateString(locale === "ar" ? "ar-EG" : "en-GB", { day: "numeric", month: "short" })} · {formData.appointmentTime}–{slotEndTime(formData.appointmentTime)}
+                        {t("selectedSlot")}: {new Date(formData.appointmentDate + "T12:00:00").toLocaleDateString(locale === "ar" ? "ar-EG" : "en-GB", { day: "numeric", month: "short" })} · {formatSlotLabel(formData.appointmentTime)} – {formatSlotLabel(slotEndTime(formData.appointmentTime))}
                       </p>
                     )}
                     {errors.appointmentTime && (
@@ -665,7 +667,7 @@ export default function BookingForm() {
                   <dt className="text-neutral-500 text-start">{t("appointment")}</dt>
                   <dd className="font-medium text-white text-start break-words">
                     {formData.appointmentDate && formData.appointmentTime
-                      ? `${formData.appointmentDate} – ${formData.appointmentTime}`
+                      ? `${new Date(formData.appointmentDate + "T12:00:00").toLocaleDateString(locale === "ar" ? "ar-EG" : "en-GB", { weekday: "short", day: "numeric", month: "short", year: "numeric" })} · ${formatSlotLabel(formData.appointmentTime)} – ${formatSlotLabel(slotEndTime(formData.appointmentTime))}`
                       : "—"}
                   </dd>
                 </div>
