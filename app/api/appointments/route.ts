@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getSupabaseServer } from "@/lib/supabase-server";
+import { getMinBookingDateStr } from "@/lib/constants";
 
 export const dynamic = "force-dynamic";
 
@@ -48,8 +49,22 @@ export async function POST(request: NextRequest) {
 
   const governorateValue = governorate ?? "";
 
+  if (governorateValue !== "cairo") {
+    return NextResponse.json(
+      { error: "Service available in Cairo only" },
+      { status: 403 }
+    );
+  }
+
   if (!/^\d{4}-\d{2}-\d{2}$/.test(date)) {
     return NextResponse.json({ error: "Invalid date" }, { status: 400 });
+  }
+
+  if (date < getMinBookingDateStr()) {
+    return NextResponse.json(
+      { error: "Booking opens from 25 February" },
+      { status: 400 }
+    );
   }
 
   const supabase = getSupabaseServer();

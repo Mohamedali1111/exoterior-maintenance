@@ -19,10 +19,10 @@ export default function Nav() {
       className="sticky top-0 z-50 border-b border-neutral-600/40 bg-neutral-950/90 pt-[env(safe-area-inset-top)] backdrop-blur-xl supports-[backdrop-filter]:bg-neutral-950/85"
       dir={isAr ? "rtl" : "ltr"}
     >
-      <div className="mx-auto flex max-w-6xl items-center justify-between gap-2 px-4 py-3.5 sm:gap-4 sm:px-6">
+      <div className="mx-auto flex max-w-6xl items-center justify-between gap-1.5 px-3 py-2.5 sm:gap-4 sm:px-6 sm:py-3.5">
         <Link
           href="/"
-          className="min-h-[44px] min-w-[44px] flex items-center transition-opacity duration-200 hover:opacity-90 active:opacity-80"
+          className="min-h-[40px] min-w-[40px] flex items-center transition-opacity duration-200 hover:opacity-90 active:opacity-80"
           aria-label="Exoterior – Home"
         >
           <Image
@@ -30,11 +30,11 @@ export default function Nav() {
             alt="Exoterior"
             width={160}
             height={44}
-            className="logo-on-dark h-9 w-auto object-contain sm:h-10"
+            className="logo-on-dark h-8 w-auto object-contain sm:h-10"
             priority
           />
         </Link>
-        <div className="flex items-center gap-1.5 sm:gap-4">
+        <div className="flex items-center gap-1 sm:gap-4">
           <div className="hidden gap-1 md:flex lg:gap-6">
             {navLinks.map(({ key, href }) => (
               <a
@@ -47,14 +47,14 @@ export default function Nav() {
             ))}
           </div>
           <div
-            className="flex rounded-full bg-neutral-800/90 p-0.5 ring-1 ring-neutral-600/50 ms-4 me-4 sm:ms-6 sm:me-6 md:ms-8 md:me-8"
+            className="flex rounded-full bg-neutral-800/90 p-0.5 ring-1 ring-neutral-600/50 ms-2 me-2 sm:ms-6 sm:me-6 md:ms-8 md:me-8"
             role="group"
             aria-label="Language"
           >
             <Link
               href="/"
               locale="en"
-              className={`flex min-h-[40px] min-w-[44px] items-center justify-center rounded-full px-3.5 text-sm font-medium transition-all duration-200 active:scale-95 ${
+              className={`flex min-h-[36px] min-w-[38px] sm:min-h-[40px] sm:min-w-[44px] items-center justify-center rounded-full px-2.5 sm:px-3.5 text-xs sm:text-sm font-medium transition-all duration-200 active:scale-95 ${
                 !isAr
                   ? "bg-red-600 text-white shadow-inner"
                   : "text-neutral-400 hover:text-white"
@@ -65,7 +65,7 @@ export default function Nav() {
             <Link
               href="/"
               locale="ar"
-              className={`flex min-h-[40px] min-w-[44px] items-center justify-center rounded-full px-3.5 text-sm font-medium transition-all duration-200 active:scale-95 ${
+              className={`flex min-h-[36px] min-w-[38px] sm:min-h-[40px] sm:min-w-[44px] items-center justify-center rounded-full px-2.5 sm:px-3.5 text-xs sm:text-sm font-medium transition-all duration-200 active:scale-95 ${
                 isAr
                   ? "bg-red-600 text-white shadow-inner"
                   : "text-neutral-400 hover:text-white"
@@ -76,7 +76,7 @@ export default function Nav() {
           </div>
           <a
             href="#booking"
-            className="flex min-h-[44px] min-w-[44px] shrink-0 touch-manipulation items-center justify-center rounded-full bg-red-600 px-5 py-3 text-sm font-semibold text-white shadow-lg shadow-red-950/40 transition-all duration-200 hover:bg-red-500 active:scale-[0.98] active:bg-red-700 sm:min-w-0 sm:py-2.5"
+            className="flex min-h-[38px] shrink-0 touch-manipulation items-center justify-center rounded-full bg-red-600 px-3 py-2 text-xs font-semibold text-white shadow-md transition-all duration-200 hover:bg-red-500 active:scale-[0.98] active:bg-red-700 sm:min-h-[44px] sm:min-w-[44px] sm:px-5 sm:py-2.5 sm:text-sm"
           >
             {t("booking")}
           </a>
