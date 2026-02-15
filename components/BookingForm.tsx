@@ -665,11 +665,14 @@ export default function BookingForm() {
             </div>
           )}
 
-          <div className="mt-6 sm:mt-8 flex flex-row flex-wrap gap-2 sm:justify-between sm:gap-4">
+          {submitError && step === STEPS && (
+            <p className="mt-6 sm:mt-8 mb-1 text-xs sm:text-sm text-red-500 text-start break-words">{submitError}</p>
+          )}
+          <div className="mt-6 sm:mt-8 flex flex-row justify-between items-center gap-4 w-full">
             <button
               type="button"
               onClick={() => setStep((s) => Math.max(1, s - 1))}
-              className="min-h-[42px] shrink-0 touch-manipulation rounded-lg sm:rounded-xl border border-white/12 bg-white/5 px-4 py-2.5 text-xs sm:text-sm font-medium text-neutral-300 transition-all duration-200 hover:border-white/20 hover:bg-white/8 active:scale-[0.98] text-start rtl:order-1 sm:min-h-[44px] sm:px-5 sm:py-3"
+              className="min-h-[42px] shrink-0 touch-manipulation rounded-lg sm:rounded-xl border border-white/12 bg-white/5 px-4 py-2.5 text-xs sm:text-sm font-medium text-neutral-300 transition-all duration-200 hover:border-white/20 hover:bg-white/8 active:scale-[0.98] sm:min-h-[44px] sm:px-5 sm:py-3 order-1"
             >
               {t("back")}
             </button>
@@ -677,24 +680,19 @@ export default function BookingForm() {
               <button
                 type="button"
                 onClick={handleNext}
-                className="min-h-[42px] shrink-0 touch-manipulation rounded-lg sm:rounded-xl bg-red-600 px-4 py-2.5 text-xs sm:text-sm font-semibold text-white shadow-md transition-all duration-200 hover:bg-red-500 active:scale-[0.98] text-start rtl:order-2 sm:min-h-[44px] sm:px-5 sm:py-3"
+                className="min-h-[42px] shrink-0 touch-manipulation rounded-lg sm:rounded-xl bg-red-600 px-4 py-2.5 text-xs sm:text-sm font-semibold text-white shadow-md transition-all duration-200 hover:bg-red-500 active:scale-[0.98] sm:min-h-[44px] sm:px-5 sm:py-3 order-2"
               >
                 {t("next")}
               </button>
             ) : (
-              <div className="w-full sm:w-auto rtl:order-2 min-w-0 sm:ml-auto">
-                {submitError && (
-                  <p className="mb-1.5 text-xs sm:text-sm text-red-500 text-start break-words">{submitError}</p>
-                )}
-                <button
-                  type="button"
-                  onClick={handleSubmit}
-                  disabled={submitLoading}
-                  className="min-h-[42px] w-full sm:w-auto sm:min-w-[120px] touch-manipulation rounded-lg sm:rounded-xl bg-red-600 px-4 py-2.5 text-xs sm:text-sm font-semibold text-white shadow-md transition-all duration-200 hover:bg-red-500 active:scale-[0.98] disabled:opacity-50 sm:min-h-[44px] sm:px-5 sm:py-3 text-start"
-                >
-                  {submitLoading ? "…" : t("submit")}
-                </button>
-              </div>
+              <button
+                type="button"
+                onClick={handleSubmit}
+                disabled={submitLoading}
+                className="min-h-[42px] shrink-0 min-w-[120px] touch-manipulation rounded-lg sm:rounded-xl bg-red-600 px-4 py-2.5 text-xs sm:text-sm font-semibold text-white shadow-md transition-all duration-200 hover:bg-red-500 active:scale-[0.98] disabled:opacity-50 sm:min-h-[44px] sm:px-5 sm:py-3 order-2"
+              >
+                {submitLoading ? "…" : t("submit")}
+              </button>
             )}
           </div>
         </div>
