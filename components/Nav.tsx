@@ -1,5 +1,6 @@
 "use client";
 
+import Image from "next/image";
 import { useTranslations, useLocale } from "next-intl";
 import { Link } from "@/i18n/navigation";
 
@@ -21,9 +22,17 @@ export default function Nav() {
       <div className="mx-auto flex max-w-6xl items-center justify-between gap-2 px-4 py-3.5 sm:gap-4 sm:px-6">
         <Link
           href="/"
-          className="min-h-[44px] min-w-[44px] flex items-center text-lg font-bold tracking-tight text-white sm:text-xl transition-colors duration-200 hover:text-red-400 active:opacity-80"
+          className="min-h-[44px] min-w-[44px] flex items-center transition-opacity duration-200 hover:opacity-90 active:opacity-80"
+          aria-label="Exoterior – Home"
         >
-          Exoterior
+          <Image
+            src="/Logo.png"
+            alt="Exoterior"
+            width={160}
+            height={44}
+            className="logo-on-dark h-9 w-auto object-contain sm:h-10"
+            priority
+          />
         </Link>
         <div className="flex items-center gap-1.5 sm:gap-4">
           <div className="hidden gap-1 md:flex lg:gap-6">

@@ -2,15 +2,14 @@
 
 import { useState, useRef, useEffect } from "react";
 import { useTranslations, useLocale } from "next-intl";
-import { MAIN_SERVICES, SUB_SERVICES, type MainServiceId } from "@/lib/services";
-import { EGYPT_PHONE_REGEX, FORMSUBMIT_EMAIL, GOVERNORATE_IDS, APPOINTMENT_TIME_SLOTS, APPOINTMENT_DAYS_AHEAD, slotEndTime } from "@/lib/constants";
+import { MAIN_SERVICES, type MainServiceId } from "@/lib/services";
+import { EGYPT_PHONE_REGEX, FORMSUBMIT_EMAIL, APPOINTMENT_TIME_SLOTS, APPOINTMENT_DAYS_AHEAD, slotEndTime } from "@/lib/constants";
 
 const STEPS = 4;
 
 type FormData = {
   fullName: string;
   phone: string;
-  governorate: string;
   addressLine: string;
   subServices: string[];
   notes: string;
@@ -21,7 +20,6 @@ type FormData = {
 const initialFormData: FormData = {
   fullName: "",
   phone: "",
-  governorate: "",
   addressLine: "",
   subServices: [],
   notes: "",
@@ -31,41 +29,7 @@ const initialFormData: FormData = {
 
 type Errors = Partial<Record<keyof FormData, string>>;
 
-type GeocodedAddress = { governorate: string; addressLine: string };
-
-const GOVERNORATE_MATCH: Record<string, string> = {
-  cairo: "cairo", القاهرة: "cairo", "al qahirah": "cairo",
-  giza: "giza", الجيزة: "giza",
-  alexandria: "alexandria", الإسكندرية: "alexandria",
-  dakahlia: "dakahlia", الدقهلية: "dakahlia",
-  "red sea": "red_sea", "red sea governorate": "red_sea",
-  beheira: "beheira", البحيرة: "beheira",
-  fayoum: "fayoum", الفيوم: "fayoum",
-  gharbia: "gharbia", الغربية: "gharbia",
-  ismailia: "ismailia", الإسماعيلية: "ismailia",
-  menoufia: "menoufia", المنوفية: "menoufia",
-  minya: "minya", المنيا: "minya",
-  qalyubia: "qalyubia", القليوبية: "qalyubia",
-  qena: "qena", sohag: "sohag", سوهاج: "sohag",
-  "beni suef": "beni_suef", "bani suwayf": "beni_suef",
-  aswan: "aswan", أسوان: "aswan",
-  asyut: "asyut", أسيوط: "asyut", assiut: "asyut",
-  damietta: "damietta", دمياط: "damietta",
-  "kafr el sheikh": "kafr_el_sheikh", "kafr el-sheikh": "kafr_el_sheikh",
-  luxor: "luxor", الأقصر: "luxor",
-  matrouh: "matrouh", مطروح: "matrouh",
-  "new valley": "new_valley", "al wadi al jadid": "new_valley",
-  "north sinai": "north_sinai", "port said": "port_said", بورسعيد: "port_said",
-  "south sinai": "south_sinai", suez: "suez", السويس: "suez",
-};
-
-function matchGovernorate(name: string): string {
-  if (!name) return "";
-  const key = name.toLowerCase().trim();
-  return GOVERNORATE_MATCH[key] || "";
-}
-
-async function reverseGeocode(lat: number, lon: number): Promise<GeocodedAddress> {
+async function reverseGeocode(lat: number, lon: number): Promise<string> {
   const url = `https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lon}&zoom=18&addressdetails=1`;
   const res = await fetch(url, {
     headers: { "Accept-Language": "en" },
@@ -73,16 +37,11 @@ async function reverseGeocode(lat: number, lon: number): Promise<GeocodedAddress
   if (!res.ok) throw new Error("Geocoding failed");
   const data = await res.json();
   const a = data.address || {};
-  const state = (a.state || a.county || "").toString();
-  const city = (a.city || a.town || a.village || "").toString();
-  const governorateId = matchGovernorate(state) || matchGovernorate(city);
   const streetPart = [a.road, a.house_number].filter(Boolean).join(" ");
   const areaPart = a.suburb || a.neighbourhood || a.city_district || "";
+  const city = (a.city || a.town || a.village || "").toString();
   const addressLine = [streetPart, areaPart, city].filter(Boolean).join(", ") || data.display_name || "";
-  return {
-    governorate: governorateId || state || city,
-    addressLine: addressLine || state || city,
-  };
+  return addressLine || (a.state || a.county || "").toString();
 }
 
 export default function BookingForm() {
@@ -95,7 +54,6 @@ export default function BookingForm() {
   const [errors, setErrors] = useState<Errors>({});
   const [locationLoading, setLocationLoading] = useState(false);
   const [locationError, setLocationError] = useState<string | null>(null);
-  const [expandedCategory, setExpandedCategory] = useState<MainServiceId | null>(null);
   const [submitted, setSubmitted] = useState(false);
   const [submitLoading, setSubmitLoading] = useState(false);
   const [submitError, setSubmitError] = useState<string | null>(null);
@@ -148,7 +106,6 @@ export default function BookingForm() {
     if (!formData.phone.trim()) e.phone = t("validation.phoneRequired");
     else if (!EGYPT_PHONE_REGEX.test(formData.phone.replace(/\s/g, "")))
       e.phone = t("validation.phoneInvalid");
-    if (!formData.governorate.trim()) e.governorate = t("validation.addressRequired");
     if (!formData.addressLine.trim()) e.addressLine = t("validation.addressRequired");
     setErrors(e);
     return Object.keys(e).length === 0;
@@ -157,7 +114,9 @@ export default function BookingForm() {
   const validateStep2 = (): boolean => {
     const e: Errors = {};
     if (formData.subServices.length === 0)
-      e.subServices = t("validation.subServiceRequired");
+      e.subServices = t("validation.serviceRequired");
+    if (!formData.notes.trim())
+      e.notes = t("validation.problemRequired");
     setErrors(e);
     return Object.keys(e).length === 0;
   };
@@ -190,14 +149,8 @@ export default function BookingForm() {
     navigator.geolocation.getCurrentPosition(
       async (pos) => {
         try {
-          const { governorate: gov, addressLine: line } = await reverseGeocode(
-            pos.coords.latitude,
-            pos.coords.longitude
-          );
-          update({
-            governorate: GOVERNORATE_IDS.includes(gov as typeof GOVERNORATE_IDS[number]) ? gov : formData.governorate,
-            addressLine: line || formData.addressLine,
-          });
+          const line = await reverseGeocode(pos.coords.latitude, pos.coords.longitude);
+          update({ addressLine: line || formData.addressLine });
         } catch {
           setLocationError("Could not get address");
         } finally {
@@ -211,26 +164,15 @@ export default function BookingForm() {
     );
   };
 
-  const toggleSubService = (id: string) => {
+  const toggleMainService = (id: MainServiceId) => {
     setFormData((prev) => ({
       ...prev,
       subServices: prev.subServices.includes(id)
         ? prev.subServices.filter((s) => s !== id)
         : [...prev.subServices, id],
     }));
-    setErrors((prev) => ({ ...prev, subServices: undefined }));
+    setErrors((prev) => ({ ...prev, subServices: undefined, notes: undefined }));
   };
-
-  const toggleCategory = (id: MainServiceId) => {
-    setExpandedCategory((prev) => (prev === id ? null : id));
-  };
-
-  const governorateLabel = formData.governorate
-    ? (GOVERNORATE_IDS.includes(formData.governorate as (typeof GOVERNORATE_IDS)[number])
-        ? t(`governorates.${formData.governorate}`)
-        : formData.governorate)
-    : "";
-  const fullAddressDisplay = [governorateLabel, formData.addressLine].filter(Boolean).join(", ");
 
   const handleSubmit = async () => {
     if (step !== STEPS) return;
@@ -256,7 +198,7 @@ export default function BookingForm() {
           timeSlot: formData.appointmentTime,
           fullName: formData.fullName,
           phone: formData.phone,
-          governorate: formData.governorate,
+          governorate: "",
           addressLine: formData.addressLine,
           subServices: formData.subServices,
           notes: formData.notes,
@@ -271,15 +213,49 @@ export default function BookingForm() {
         return;
       }
       if (!res.ok) throw new Error("Book failed");
+
+      const servicesList = formData.subServices.map((s) => tServices(`main.${s}`)).join(", ");
+      const appointmentDateFormatted = new Date(formData.appointmentDate + "T12:00:00").toLocaleDateString(locale === "ar" ? "ar-EG" : "en-GB", {
+        weekday: "long",
+        day: "numeric",
+        month: "long",
+        year: "numeric",
+      });
+      const slotEnd = slotEndTime(formData.appointmentTime);
+      const submittedAt = new Date().toLocaleString(locale === "ar" ? "ar-EG" : "en-GB", {
+        dateStyle: "medium",
+        timeStyle: "short",
+      });
+
+      const emailDetails = [
+        "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━",
+        "  EXOTERIOR – NEW BOOKING REQUEST",
+        "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━",
+        "",
+        "► CONTACT INFORMATION",
+        "  Full name: " + formData.fullName,
+        "  Phone: " + formData.phone,
+        "  Address: " + formData.addressLine,
+        "",
+        "► SERVICES REQUESTED",
+        "  " + servicesList,
+        "",
+        "► PROBLEM / DESCRIPTION",
+        "  " + (formData.notes.trim() || "(none)"),
+        "",
+        "► APPOINTMENT",
+        "  Date: " + appointmentDateFormatted,
+        "  Time slot: " + formData.appointmentTime + " – " + slotEnd + " (1 hour)",
+        "",
+        "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━",
+        "Submitted: " + submittedAt,
+        "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━",
+      ].join("\r\n");
+
       const emailBody = new FormData();
-      emailBody.append("_subject", "Exoterior – New booking request");
+      emailBody.append("_subject", "Exoterior – Booking: " + formData.appointmentDate + " at " + formData.appointmentTime + " – " + formData.fullName);
       emailBody.append("_captcha", "false");
-      emailBody.append("Full Name", formData.fullName);
-      emailBody.append("Phone", formData.phone);
-      emailBody.append("Address", fullAddressDisplay);
-      emailBody.append("Appointment", `${formData.appointmentDate} at ${formData.appointmentTime}`);
-      emailBody.append("Services", formData.subServices.map((s) => tServices(`sub.${s}`)).join(", "));
-      emailBody.append("Notes", formData.notes);
+      emailBody.append("Booking details", emailDetails);
       await fetch(`https://formsubmit.co/${FORMSUBMIT_EMAIL}`, { method: "POST", body: emailBody });
       setSubmitted(true);
     } catch {
@@ -375,34 +351,13 @@ export default function BookingForm() {
               </div>
               <div className="min-w-0">
                 <label className="block text-sm font-medium text-neutral-300 text-start">
-                  {t("governorate")}
-                </label>
-                <select
-                  value={formData.governorate}
-                  onChange={(e) => update({ governorate: e.target.value })}
-                  className="mt-1.5 min-h-[48px] w-full max-w-full touch-manipulation appearance-none rounded-xl border border-white/12 bg-white/5 px-4 py-3 text-base text-white transition-all duration-200 focus:border-red-500 focus:outline-none focus:ring-2 focus:ring-red-500/30 text-start [&>option]:bg-neutral-900 [&>option]:text-white"
-                  dir={isAr ? "rtl" : "ltr"}
-                >
-                  <option value="">{t("governoratePlaceholder")}</option>
-                  {GOVERNORATE_IDS.map((id) => (
-                    <option key={id} value={id}>
-                      {t(`governorates.${id}`)}
-                    </option>
-                  ))}
-                </select>
-                {errors.governorate && (
-                  <p className="mt-1 text-sm text-red-500 text-start">{errors.governorate}</p>
-                )}
-              </div>
-              <div className="min-w-0">
-                <label className="block text-sm font-medium text-neutral-300 text-start">
-                  {t("fullAddress")}
+                  {t("address")}
                 </label>
                 <input
                   type="text"
                   value={formData.addressLine}
                   onChange={(e) => update({ addressLine: e.target.value })}
-                  placeholder={t("fullAddressPlaceholder")}
+                  placeholder={t("addressPlaceholder")}
                   className="mt-1.5 min-h-[48px] w-full max-w-full touch-manipulation rounded-xl border border-white/12 bg-white/5 px-4 py-3 text-base text-white placeholder:text-neutral-500 transition-all duration-200 focus:border-red-500 focus:outline-none focus:ring-2 focus:ring-red-500/30 text-start"
                   dir={isAr ? "rtl" : "ltr"}
                 />
@@ -426,7 +381,7 @@ export default function BookingForm() {
                       {t("useMyLocationTitle")}
                     </h4>
                     <p className="mt-1 text-xs sm:text-sm text-neutral-400">
-                      {t("useMyLocationDesc")}
+                      {t("useMyLocationDescAddress")}
                     </p>
                     {locationError && (
                       <p className="mt-2 text-sm text-amber-500">{locationError}</p>
@@ -445,79 +400,67 @@ export default function BookingForm() {
             </div>
           )}
 
-          {/* Step 2 – services accordion, mobile-friendly */}
+          {/* Step 2 – choose main service(s) stacked, then describe problem */}
           {step === 2 && (
-            <div className="space-y-4 sm:space-y-6 text-start min-w-0">
+            <div className="space-y-5 sm:space-y-6 text-start min-w-0">
               <h3 className="text-base sm:text-lg font-semibold text-white text-start pb-1">
                 {t("step2")}
               </h3>
-              <p className="text-xs sm:text-sm text-neutral-400 text-start">
-                {t("categories")} — {t("expandCategory")}
+              <p className="text-sm text-neutral-400 text-start">
+                {t("chooseServiceHint")}
               </p>
-              <div className="space-y-2">
-                {MAIN_SERVICES.map((mainId) => (
-                  <div
-                    key={mainId}
-                    className="overflow-hidden rounded-xl border border-white/8 bg-white/3 transition-all duration-200 hover:border-white/12 min-w-0"
-                  >
+              <div className="space-y-2 sm:space-y-2.5">
+                {MAIN_SERVICES.map((mainId) => {
+                  const selected = formData.subServices.includes(mainId);
+                  return (
                     <button
+                      key={mainId}
                       type="button"
-                      onClick={() => toggleCategory(mainId)}
-                      className={`flex w-full min-h-[48px] touch-manipulation items-center justify-between px-4 py-3.5 text-start transition-colors sm:min-h-[52px] ${
-                        expandedCategory === mainId
-                          ? "border-b border-white/8 bg-white/5 text-red-400"
-                          : "text-neutral-200 hover:bg-white/4"
+                      onClick={() => toggleMainService(mainId)}
+                      className={`flex w-full min-h-[52px] sm:min-h-[56px] touch-manipulation items-center justify-between gap-3 rounded-xl border px-4 py-3.5 text-start transition-all duration-200 active:scale-[0.99] ${
+                        selected
+                          ? "border-red-500 bg-red-600/90 text-white shadow-lg shadow-red-950/40 ring-1 ring-red-400/30"
+                          : "border-white/15 bg-white/5 text-neutral-200 hover:border-white/25 hover:bg-white/8"
                       }`}
                     >
-                      <span className="font-medium text-sm sm:text-base truncate">{tServices(`main.${mainId}`)}</span>
-                      <span className="text-lg text-neutral-500 shrink-0 ml-2" aria-hidden>
-                        {expandedCategory === mainId ? "−" : "+"}
+                      <span className="font-medium text-sm sm:text-base truncate">
+                        {tServices(`main.${mainId}`)}
+                      </span>
+                      <span
+                        className={`flex h-6 w-6 shrink-0 items-center justify-center rounded-full border-2 text-xs font-bold ${
+                          selected
+                            ? "border-white bg-white/20 text-white"
+                            : "border-neutral-500 text-transparent"
+                        }`}
+                        aria-hidden
+                      >
+                        {selected ? "✓" : ""}
                       </span>
                     </button>
-                    {expandedCategory === mainId && (
-                      <div className="border-t border-white/6 p-3 pt-2">
-                        <p className="mb-2 text-xs font-medium text-neutral-500 text-start">
-                          {t("subServices")}
-                        </p>
-                        <div className="flex flex-wrap gap-2">
-                          {SUB_SERVICES[mainId].map((subId) => (
-                            <label
-                              key={subId}
-                              className="flex min-h-[44px] cursor-pointer items-center gap-3 rounded-lg border border-white/12 bg-white/5 px-3 py-2.5 transition-all duration-200 hover:border-white/20 hover:bg-white/6 active:scale-[0.99] touch-manipulation"
-                            >
-                              <input
-                                type="checkbox"
-                                checked={formData.subServices.includes(subId)}
-                                onChange={() => toggleSubService(subId)}
-                                className="h-4 w-4 shrink-0 rounded border-neutral-500 text-red-600"
-                              />
-                              <span className="text-sm text-neutral-200 break-words">
-                                {tServices(`sub.${subId}`)}
-                              </span>
-                            </label>
-                          ))}
-                        </div>
-                      </div>
-                    )}
-                  </div>
-                ))}
-                {errors.subServices && (
-                  <p className="mt-2 text-sm text-red-500 text-start">{errors.subServices}</p>
-                )}
+                  );
+                })}
               </div>
-              <div className="min-w-0">
-                <label className="block text-sm font-medium text-neutral-300 text-start">
-                  {t("notes")}
-                </label>
-                <textarea
-                  value={formData.notes}
-                  onChange={(e) => update({ notes: e.target.value })}
-                  placeholder={t("notesPlaceholder")}
-                  rows={3}
-                  className="mt-1.5 min-h-[88px] w-full max-w-full touch-manipulation rounded-xl border border-white/12 bg-white/5 px-4 py-3 text-base text-white placeholder:text-neutral-500 transition-all duration-200 focus:border-red-500 focus:outline-none focus:ring-2 focus:ring-red-500/30 text-start"
-                  dir={isAr ? "rtl" : "ltr"}
-                />
-              </div>
+              {errors.subServices && (
+                <p className="text-sm text-red-500 text-start">{errors.subServices}</p>
+              )}
+              {formData.subServices.length > 0 && (
+                <div className="min-w-0 pt-1">
+                  <label className="block text-sm font-medium text-neutral-300 text-start mb-1.5">
+                    {t("describeProblem")}
+                  </label>
+                  <textarea
+                    value={formData.notes}
+                    onChange={(e) => update({ notes: e.target.value })}
+                    placeholder={t("describeProblemPlaceholder")}
+                    rows={4}
+                    className="min-h-[112px] w-full max-w-full touch-manipulation rounded-xl border border-white/15 bg-white/5 px-4 py-3.5 text-base text-white placeholder:text-neutral-500 transition-all duration-200 focus:border-red-500 focus:outline-none focus:ring-2 focus:ring-red-500/30 text-start"
+                    dir={isAr ? "rtl" : "ltr"}
+                  />
+                  {errors.notes && (
+                    <p className="mt-1.5 text-sm text-red-500 text-start">{errors.notes}</p>
+                  )}
+                </div>
+              )}
             </div>
           )}
 
@@ -657,15 +600,21 @@ export default function BookingForm() {
                   <dd className="font-medium text-white text-start break-words" dir="ltr">{formData.phone}</dd>
                 </div>
                 <div className="min-w-0 break-words">
-                  <dt className="text-neutral-500 text-start">{t("fullAddress")}</dt>
-                  <dd className="font-medium text-white text-start break-words">{fullAddressDisplay || "—"}</dd>
+                  <dt className="text-neutral-500 text-start">{t("address")}</dt>
+                  <dd className="font-medium text-white text-start break-words">{formData.addressLine || "—"}</dd>
                 </div>
                 {formData.subServices.length > 0 && (
                   <div className="min-w-0 break-words">
-                    <dt className="text-neutral-500 text-start">{t("subServices")}</dt>
+                    <dt className="text-neutral-500 text-start">{t("services")}</dt>
                     <dd className="font-medium text-white text-start break-words">
-                      {formData.subServices.map((s) => tServices(`sub.${s}`)).join(", ")}
+                      {formData.subServices.map((s) => tServices(`main.${s}`)).join(", ")}
                     </dd>
+                  </div>
+                )}
+                {formData.notes.trim() && (
+                  <div className="min-w-0 break-words">
+                    <dt className="text-neutral-500 text-start">{t("problem")}</dt>
+                    <dd className="font-medium text-white text-start break-words whitespace-pre-wrap">{formData.notes}</dd>
                   </div>
                 )}
                 <div className="min-w-0 break-words">

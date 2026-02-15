@@ -38,7 +38,6 @@ export async function POST(request: NextRequest) {
     !timeSlot ||
     !fullName ||
     !phone ||
-    !governorate ||
     addressLine === undefined
   ) {
     return NextResponse.json(
@@ -46,6 +45,8 @@ export async function POST(request: NextRequest) {
       { status: 400 }
     );
   }
+
+  const governorateValue = governorate ?? "";
 
   if (!/^\d{4}-\d{2}-\d{2}$/.test(date)) {
     return NextResponse.json({ error: "Invalid date" }, { status: 400 });
@@ -61,7 +62,7 @@ export async function POST(request: NextRequest) {
     time_slot: timeSlot,
     full_name: fullName,
     phone,
-    governorate,
+    governorate: governorateValue,
     address_line: addressLine ?? "",
     sub_services: subServices ?? [],
     notes: notes ?? null,

@@ -1,5 +1,6 @@
 "use client";
 
+import Image from "next/image";
 import { useTranslations } from "next-intl";
 import { useRef, useEffect } from "react";
 
@@ -61,8 +62,15 @@ export default function Hero() {
       <div className="absolute inset-0 bg-gradient-to-b from-transparent via-transparent to-black/40 pointer-events-none" aria-hidden />
       {/* Content */}
       <div className="relative z-10 mx-auto flex min-h-[40vh] max-w-3xl flex-col items-center justify-center text-center sm:min-h-[50vh]">
-        <h1 className="text-4xl font-bold tracking-tight text-white drop-shadow-lg sm:text-5xl md:text-6xl animate-[fade-in-up_0.7s_ease-out_both]">
-          Exoterior
+        <h1 className="animate-[fade-in-up_0.7s_ease-out_both]">
+          <Image
+            src="/Logo.png"
+            alt="Exoterior"
+            width={320}
+            height={120}
+            className="logo-on-dark-hero w-56 sm:w-64 md:w-72 h-auto object-contain"
+            priority
+          />
         </h1>
         <p className="mt-4 text-base leading-relaxed text-neutral-200 drop-shadow-md sm:text-lg md:text-xl animate-[fade-in-up_0.7s_ease-out_0.15s_both]">
           {t("tagline")}

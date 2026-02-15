@@ -13,13 +13,13 @@ export default function Footer() {
         <div className="w-full sm:w-auto">
           <p className="font-semibold text-white">{t("contact")}</p>
           <p className="mt-3 text-sm text-start">
-            {t("phone")}: <a href="tel:+200000000000" dir="ltr" className="inline-block py-1 transition-colors duration-200 hover:text-red-400 active:opacity-80" style={{ unicodeBidi: "isolate" }}>+20 000 000 0000</a>
+            {t("phone")}: <a href="tel:+201055554291" dir="ltr" className="inline-block py-1 transition-colors duration-200 hover:text-red-400 active:opacity-80" style={{ unicodeBidi: "isolate" }}>+20 10 55554291</a>
           </p>
           <p className="text-sm text-start">
-            {t("whatsapp")}: <a href="https://wa.me/200000000000" target="_blank" rel="noopener noreferrer" dir="ltr" className="inline-block py-1 transition-colors duration-200 hover:text-red-400 active:opacity-80" style={{ unicodeBidi: "isolate" }}>+20 000 000 0000</a>
+            {t("whatsapp")}: <a href="https://wa.me/201055554291" target="_blank" rel="noopener noreferrer" dir="ltr" className="inline-block py-1 transition-colors duration-200 hover:text-red-400 active:opacity-80" style={{ unicodeBidi: "isolate" }}>+20 10 55554291</a>
           </p>
           <p className="text-sm text-start">
-            {t("email")}: <a href="mailto:info@exoterior.org" dir="ltr" className="inline-block py-1 transition-colors duration-200 hover:text-red-400 active:opacity-80" style={{ unicodeBidi: "isolate" }}>info@exoterior.com</a>
+            {t("email")}: <a href="mailto:info@exoterior.org" dir="ltr" className="inline-block py-1 transition-colors duration-200 hover:text-red-400 active:opacity-80" style={{ unicodeBidi: "isolate" }}>info@exoterior.org</a>
           </p>
         </div>
         <div className="w-full sm:w-auto">
