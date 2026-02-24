@@ -2,25 +2,19 @@ This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-
 
 ## Exoterior – Maintenance Booking
 
-## Quick setup (your email is already set)
+## Quick setup
 
-Your booking form is set to send submissions to **mohamedali200bu@gmail.com**. You only need to do this:
+1. **Install and run**  
+   `npm install` then `npm run dev`. Open http://localhost:3000.
 
-1. **Run the site**  
-   In the project folder, run: `npm run dev`  
-   Open http://localhost:3000 and test the form.
+2. **Set your email**  
+   Copy `.env.example` to `.env.local` and set `NEXT_PUBLIC_FORMSUBMIT_EMAIL` to the address that should receive bookings.  
+   The first time FormSubmit gets a submission to that email, it will send an **activation link** – click it once. After that, all bookings go to that inbox.
 
-2. **First time someone submits the form**  
-   FormSubmit will send an email to mohamedali200bu@gmail.com with an **“Activate”** or **“Confirm”** link.  
-   Open that email and **click the link once**. After that, every new booking will arrive in that inbox.
+3. **When you deploy (e.g. Vercel)**  
+   In **Settings → Environment Variables**, add `NEXT_PUBLIC_FORMSUBMIT_EMAIL` (and optionally `NEXT_PUBLIC_FORMSUBMIT_EMAIL_SECONDARY` for a second recipient). Redeploy. Activate the email via FormSubmit’s link if it’s the first time.
 
-3. **When you put the site online (e.g. Vercel)**  
-   In Vercel → your project → **Settings** → **Environment Variables**, add:
-   - Name: `NEXT_PUBLIC_FORMSUBMIT_EMAIL`  
-   - Value: `mohamedali200bu@gmail.com`  
-   Then redeploy. If it’s the first time with this email, check the inbox and click the activation link again.
-
-That’s it. No database or extra signup is required for the form to send to your email.
+No database is required for the form to work. For slot blocking (prevent double-booking), see *How to enable Supabase* below.
 
 ---
 
@@ -40,7 +34,15 @@ bun dev
 
 Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+**Project structure (for edits):**
+- `app/[locale]/page.tsx` – main page layout and sections
+- `components/` – Nav, Hero, BookingForm, Footer, etc.
+- `messages/en.json` and `messages/ar.json` – all visible text (EN/AR)
+- `lib/constants.ts` – time slots, booking rules, env-based config
+- `public/Logo.png` – logo; `public/videos/hero-bg.mp4` – hero video (see `public/videos/README.md`)
+- Never commit `.env.local`; use `.env.example` as a template.
+
+**Security (injection & data):** User input is never rendered as HTML (no `dangerouslySetInnerHTML`). The API validates and sanitizes all inputs: date format, time slot allowlist, phone format (Egypt), and max lengths for name/address/notes. Supabase uses parameterized queries (no SQL injection). The service role key is server-only (not in `NEXT_PUBLIC_*`). For production, consider rate limiting the booking API (e.g. Vercel or a middleware) to reduce spam.
 
 This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
 
@@ -140,3 +142,13 @@ The app is ready to deploy on Vercel. No code edits needed.
 3. Redeploy.
 
 FormSubmit works from your Vercel domain. If you use a new email with FormSubmit, check your inbox and click the activation link once.
+
+---
+
+## Before you go live (checklist)
+
+- [ ] Set `NEXT_PUBLIC_FORMSUBMIT_EMAIL` (and optional second email) in Vercel Environment Variables.
+- [ ] Activate each FormSubmit email (click the link in the first confirmation email).
+- [ ] Optional: Add Supabase for slot blocking (see above); set `NEXT_PUBLIC_SUPABASE_URL` and `SUPABASE_SERVICE_ROLE_KEY` in Vercel.
+- [ ] Connect your domain in Vercel (Settings → Domains) and point your DNS (e.g. GoDaddy) to Vercel.
+- [ ] Replace `public/Logo.png` and `public/videos/hero-bg.mp4` if you use your own assets (see `public/videos/README.md` for video).

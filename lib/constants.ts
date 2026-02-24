@@ -14,15 +14,6 @@ export const FORMSUBMIT_EMAIL_SECONDARY =
 /** Egypt mobile: 01 + 9 digits */
 export const EGYPT_PHONE_REGEX = /^01[0-9]{9}$/;
 
-/** Egypt governorates – IDs match booking.governorates.* in messages */
-export const GOVERNORATE_IDS = [
-  "cairo", "giza", "alexandria", "dakahlia", "red_sea", "beheira", "fayoum", "gharbia",
-  "ismailia", "menoufia", "minya", "qalyubia", "qena", "sohag", "beni_suef", "aswan", "asyut",
-  "damietta", "kafr_el_sheikh", "luxor", "matrouh", "new_valley", "north_sinai", "port_said",
-  "south_sinai", "suez",
-] as const;
-export type GovernorateId = (typeof GOVERNORATE_IDS)[number];
-
 /** Appointment time slots: 1 hour each, 12:00–21:00 (12 PM–9 PM start, last slot ends 10 PM). Format HH:mm = start of 1-hour block. */
 export const APPOINTMENT_TIME_SLOTS = [
   "12:00", "13:00", "14:00", "15:00", "16:00", "17:00", "18:00", "19:00", "20:00", "21:00",
