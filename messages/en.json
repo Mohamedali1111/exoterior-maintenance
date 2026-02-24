@@ -164,7 +164,7 @@
       "serviceRequired": "Select at least one service",
       "problemRequired": "Please describe your problem",
       "dateRequired": "Please choose a date",
-      "dateBeforeMin": "Dates are available from 25 February 2026.",
+      "dateBeforeMin": "Please choose today or a future date.",
       "timeRequired": "Please choose a time",
       "slotTaken": "This slot is already booked",
       "slotJustBooked": "This slot was just booked. Please choose another date or time.",

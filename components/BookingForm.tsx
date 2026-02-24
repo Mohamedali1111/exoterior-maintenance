@@ -12,8 +12,6 @@ import {
   slotEndTime,
   formatSlotLabel,
   getMinBookingDateStr,
-  SERVICE_AREA_CAIRO,
-  SERVICE_AREA_OTHER,
 } from "@/lib/constants";
 
 const STEPS = 4;
@@ -21,7 +19,6 @@ const STEPS = 4;
 type FormData = {
   fullName: string;
   phone: string;
-  area: string;
   addressLine: string;
   subServices: string[];
   notes: string;
@@ -32,7 +29,6 @@ type FormData = {
 const initialFormData: FormData = {
   fullName: "",
   phone: "",
-  area: "",
   addressLine: "",
   subServices: [],
   notes: "",
@@ -42,14 +38,7 @@ const initialFormData: FormData = {
 
 type Errors = Partial<Record<keyof FormData, string>>;
 
-const CAIRO_NAMES = ["cairo", "al qahirah", "al qahira", "القاهرة", "qahira"];
-
-function isInCairo(stateOrCity: string): boolean {
-  const s = (stateOrCity || "").toLowerCase().trim();
-  return CAIRO_NAMES.some((name) => s.includes(name));
-}
-
-async function reverseGeocode(lat: number, lon: number): Promise<{ addressLine: string; inCairo: boolean }> {
+async function reverseGeocode(lat: number, lon: number): Promise<string> {
   const url = `https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lon}&zoom=18&addressdetails=1`;
   const res = await fetch(url, {
     headers: { "Accept-Language": "en" },
@@ -57,13 +46,12 @@ async function reverseGeocode(lat: number, lon: number): Promise<{ addressLine: 
   if (!res.ok) throw new Error("Geocoding failed");
   const data = await res.json();
   const a = data.address || {};
-  const state = (a.state || a.county || "").toString();
-  const city = (a.city || a.town || a.village || "").toString();
-  const inCairo = isInCairo(state) || isInCairo(city);
   const streetPart = [a.road, a.house_number].filter(Boolean).join(" ");
   const areaPart = a.suburb || a.neighbourhood || a.city_district || "";
-  const addressLine = [streetPart, areaPart, city].filter(Boolean).join(", ") || data.display_name || state || city;
-  return { addressLine: addressLine || state || city, inCairo };
+  const city = (a.city || a.town || a.village || "").toString();
+  const state = (a.state || a.county || "").toString();
+  const addressLine = [streetPart, areaPart, city, state].filter(Boolean).join(", ") || data.display_name || "";
+  return addressLine || state || city || "Address";
 }
 
 export default function BookingForm() {
@@ -128,12 +116,6 @@ export default function BookingForm() {
     if (!formData.phone.trim()) e.phone = t("validation.phoneRequired");
     else if (!EGYPT_PHONE_REGEX.test(formData.phone.replace(/\s/g, "")))
       e.phone = t("validation.phoneInvalid");
-    if (!formData.area) e.area = t("validation.areaRequired");
-    else if (formData.area === SERVICE_AREA_OTHER) {
-      e.area = t("notAvailableOutsideCairo");
-      setErrors(e);
-      return false;
-    }
     if (!formData.addressLine.trim()) e.addressLine = t("validation.addressRequired");
     setErrors(e);
     return Object.keys(e).length === 0;
@@ -179,11 +161,8 @@ export default function BookingForm() {
     navigator.geolocation.getCurrentPosition(
       async (pos) => {
         try {
-          const { addressLine: line, inCairo } = await reverseGeocode(pos.coords.latitude, pos.coords.longitude);
-          update({
-            addressLine: line || formData.addressLine,
-            area: inCairo ? SERVICE_AREA_CAIRO : SERVICE_AREA_OTHER,
-          });
+          const line = await reverseGeocode(pos.coords.latitude, pos.coords.longitude);
+          update({ addressLine: line || formData.addressLine });
         } catch {
           setLocationError("Could not get address");
         } finally {
@@ -231,7 +210,7 @@ export default function BookingForm() {
           timeSlot: formData.appointmentTime,
           fullName: formData.fullName,
           phone: formData.phone,
-          governorate: formData.area === SERVICE_AREA_CAIRO ? "cairo" : "",
+          governorate: "",
           addressLine: formData.addressLine,
           subServices: formData.subServices,
           notes: formData.notes,
@@ -266,7 +245,6 @@ export default function BookingForm() {
         body.append("_captcha", "false");
         body.append("Full name", formData.fullName);
         body.append("Phone", formData.phone);
-        body.append("Area", formData.area === SERVICE_AREA_CAIRO ? "Cairo" : "—");
         body.append("Address", formData.addressLine);
         body.append("Services", servicesList);
         body.append("Problem / description", formData.notes.trim() || "(none)");
@@ -371,35 +349,6 @@ export default function BookingForm() {
                 />
                 {errors.phone && (
                   <p className="mt-1 text-xs text-red-500 text-start">{errors.phone}</p>
-                )}
-              </div>
-              <div className="min-w-0">
-                <label className="block text-xs sm:text-sm font-medium text-neutral-300 text-start">
-                  {t("area")}
-                </label>
-                <select
-                  value={formData.area}
-                  onChange={(e) => update({ area: e.target.value })}
-                  className="mt-1 min-h-[44px] w-full max-w-full touch-manipulation appearance-none rounded-lg border border-white/12 bg-white/5 pl-3 pr-8 py-2.5 text-base text-white transition-all duration-200 focus:border-red-500 focus:outline-none focus:ring-2 focus:ring-red-500/30 text-start [&>option]:bg-neutral-900 [&>option]:text-white rtl:pl-8 rtl:pr-3 sm:rounded-xl sm:py-3"
-                  dir={isAr ? "rtl" : "ltr"}
-                  style={{
-                    backgroundImage: `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 24 24' stroke='%239ca3af'%3E%3Cpath stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='M19 9l-7 7-7-7'/%3E%3C/svg%3E")`,
-                    backgroundRepeat: "no-repeat",
-                    backgroundPosition: isAr ? "left 0.5rem center" : "right 0.5rem center",
-                    backgroundSize: "1.25rem",
-                  }}
-                >
-                  <option value="">{t("areaPlaceholder")}</option>
-                  <option value={SERVICE_AREA_CAIRO}>{t("areaCairo")}</option>
-                  <option value={SERVICE_AREA_OTHER}>{t("areaOther")}</option>
-                </select>
-                {formData.area === SERVICE_AREA_OTHER && (
-                  <p className="mt-1.5 text-xs text-neutral-400 text-start">
-                    {t("notAvailableOutsideCairo")}
-                  </p>
-                )}
-                {errors.area && formData.area !== SERVICE_AREA_OTHER && (
-                  <p className="mt-1 text-xs text-red-500 text-start">{errors.area}</p>
                 )}
               </div>
               <div className="min-w-0">
@@ -516,7 +465,6 @@ export default function BookingForm() {
               </h3>
               <p className="text-xs sm:text-sm text-neutral-400 text-start">
                 {t("appointmentDuration")}
-                {(() => { const min = getMinBookingDateStr(); return min === "2025-02-25" || min === "2026-02-25"; })() ? ` ${t("bookingOpensFrom")}` : ""}
               </p>
 
               {formData.appointmentDate && slotStorageActive === false && (
@@ -637,14 +585,6 @@ export default function BookingForm() {
                   <dt className="text-neutral-500 text-start">{t("phone")}</dt>
                   <dd className="font-medium text-white text-start break-words" dir="ltr">{formData.phone}</dd>
                 </div>
-                {formData.area && (
-                  <div className="min-w-0 break-words">
-                    <dt className="text-neutral-500 text-start">{t("area")}</dt>
-                    <dd className="font-medium text-white text-start break-words">
-                      {formData.area === SERVICE_AREA_CAIRO ? t("areaCairo") : t("areaOther")}
-                    </dd>
-                  </div>
-                )}
                 <div className="min-w-0 break-words">
                   <dt className="text-neutral-500 text-start">{t("address")}</dt>
                   <dd className="font-medium text-white text-start break-words">{formData.addressLine || "—"}</dd>

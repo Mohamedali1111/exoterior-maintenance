@@ -30,7 +30,7 @@ export default function Nav() {
             alt="Exoterior"
             width={160}
             height={44}
-            className="logo-on-dark h-8 w-auto object-contain sm:h-10"
+            className="h-8 w-auto object-contain sm:h-10"
             priority
           />
         </Link>

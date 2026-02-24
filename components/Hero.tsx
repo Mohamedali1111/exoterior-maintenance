@@ -92,7 +92,7 @@ export default function Hero() {
             alt="Exoterior"
             width={320}
             height={120}
-            className="logo-on-dark-hero w-44 sm:w-60 md:w-72 h-auto object-contain"
+            className="w-44 sm:w-60 md:w-72 h-auto object-contain"
             priority
           />
         </h1>

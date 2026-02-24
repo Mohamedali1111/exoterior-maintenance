@@ -50,30 +50,11 @@ export function formatSlotLabel(slot: string): string {
 /** How many days ahead users can book (from min date). */
 export const APPOINTMENT_DAYS_AHEAD = 60;
 
-/** First bookable date in 2025 and 2026 (calendar locked before this in those years). */
-const BOOKING_START_2025 = "2025-02-25";
-const BOOKING_START_2026 = "2026-02-25";
-
-/** Booking opens from 25 Feb in 2025 and 2026; from 2027 onward, booking is available from today. Returns min date as YYYY-MM-DD (local date). */
+/** First bookable date is today. Returns min date as YYYY-MM-DD (local date). */
 export function getMinBookingDateStr(): string {
   const now = new Date();
   const y = now.getFullYear();
-  const m = now.getMonth();   // 0 = Jan, 1 = Feb
+  const m = now.getMonth();
   const d = now.getDate();
-  const today = `${y}-${(m + 1).toString().padStart(2, "0")}-${d.toString().padStart(2, "0")}`;
-
-  if (y >= 2027) return today;
-  if (y < 2025) return BOOKING_START_2025;
-  if (y === 2026) {
-    if (m > 1 || (m === 1 && d >= 25)) return today;
-    return BOOKING_START_2026;
-  }
-  // 2025: allow from 25 Feb onward
-  if (m > 1 || (m === 1 && d >= 25)) return today;
-  return BOOKING_START_2025;
+  return `${y}-${(m + 1).toString().padStart(2, "0")}-${d.toString().padStart(2, "0")}`;
 }
-
-/** Service area: only Cairo is currently served. */
-export const SERVICE_AREA_CAIRO = "cairo";
-export const SERVICE_AREA_OTHER = "other";
-export const SERVICE_AREAS = [SERVICE_AREA_CAIRO, SERVICE_AREA_OTHER] as const;
