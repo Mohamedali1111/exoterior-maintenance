@@ -14,9 +14,9 @@ export const FORMSUBMIT_EMAIL_SECONDARY =
 /** Egypt mobile: 01 + 9 digits */
 export const EGYPT_PHONE_REGEX = /^01[0-9]{9}$/;
 
-/** Appointment time slots: 1 hour each, 12:00–21:00 (12 PM–9 PM start, last slot ends 10 PM). Format HH:mm = start of 1-hour block. */
+/** Appointment time slots: 1 hour each, 10:00–21:00 (10 AM–9 PM start, last slot ends 10 PM). Format HH:mm = start of 1-hour block. */
 export const APPOINTMENT_TIME_SLOTS = [
-  "12:00", "13:00", "14:00", "15:00", "16:00", "17:00", "18:00", "19:00", "20:00", "21:00",
+  "10:00", "11:00", "12:00", "13:00", "14:00", "15:00", "16:00", "17:00", "18:00", "19:00", "20:00", "21:00",
 ] as const;
 export type AppointmentTimeSlot = (typeof APPOINTMENT_TIME_SLOTS)[number];
 

@@ -123,10 +123,6 @@ export default function BookingForm() {
 
   const validateStep2 = (): boolean => {
     const e: Errors = {};
-    if (formData.subServices.length === 0)
-      e.subServices = t("validation.serviceRequired");
-    if (!formData.notes.trim())
-      e.notes = t("validation.problemRequired");
     setErrors(e);
     return Object.keys(e).length === 0;
   };
@@ -226,7 +222,12 @@ export default function BookingForm() {
       }
       if (!res.ok) throw new Error("Book failed");
 
-      const servicesList = formData.subServices.map((s) => tServices(`main.${s}`)).join(", ");
+      const servicesList =
+        formData.subServices.length > 0
+          ? formData.subServices.map((s) => tServices(`main.${s}`)).join(", ")
+          : locale === "ar"
+            ? "غير محدد"
+            : "Not specified";
       const appointmentDateFormatted = new Date(formData.appointmentDate + "T12:00:00").toLocaleDateString(locale === "ar" ? "ar-EG" : "en-GB", {
         weekday: "long",
         day: "numeric",
