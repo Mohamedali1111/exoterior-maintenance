@@ -38,20 +38,34 @@ const initialFormData: FormData = {
 
 type Errors = Partial<Record<keyof FormData, string>>;
 
+const NOMINATIM_TIMEOUT_MS = 10000;
+
 async function reverseGeocode(lat: number, lon: number): Promise<string> {
   const url = `https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lon}&zoom=18&addressdetails=1`;
-  const res = await fetch(url, {
-    headers: { "Accept-Language": "en" },
-  });
-  if (!res.ok) throw new Error("Geocoding failed");
-  const data = await res.json();
-  const a = data.address || {};
-  const streetPart = [a.road, a.house_number].filter(Boolean).join(" ");
-  const areaPart = a.suburb || a.neighbourhood || a.city_district || "";
-  const city = (a.city || a.town || a.village || "").toString();
-  const state = (a.state || a.county || "").toString();
-  const addressLine = [streetPart, areaPart, city, state].filter(Boolean).join(", ") || data.display_name || "";
-  return addressLine || state || city || "Address";
+  const controller = new AbortController();
+  const timeoutId = setTimeout(() => controller.abort(), NOMINATIM_TIMEOUT_MS);
+  try {
+    const res = await fetch(url, {
+      signal: controller.signal,
+      headers: {
+        "Accept-Language": "en",
+        "User-Agent": "ExoteriorBooking/1.0 (maintenance booking)",
+      },
+    });
+    clearTimeout(timeoutId);
+    if (!res.ok) throw new Error("Geocoding failed");
+    const data = await res.json();
+    const a = data.address || {};
+    const streetPart = [a.road, a.house_number].filter(Boolean).join(" ");
+    const areaPart = a.suburb || a.neighbourhood || a.city_district || "";
+    const city = (a.city || a.town || a.village || "").toString();
+    const state = (a.state || a.county || "").toString();
+    const addressLine = [streetPart, areaPart, city, state].filter(Boolean).join(", ") || data.display_name || "";
+    return addressLine || state || city || "Address";
+  } catch (e) {
+    clearTimeout(timeoutId);
+    throw e;
+  }
 }
 
 export default function BookingForm() {
@@ -72,6 +86,7 @@ export default function BookingForm() {
   const [slotStorageActive, setSlotStorageActive] = useState<boolean | null>(null);
   const formScrollRef = useRef<HTMLDivElement>(null);
   const isFirstRender = useRef(true);
+  const locationRequestId = useRef(0);
 
   useEffect(() => {
     if (!formData.appointmentDate) {
@@ -149,26 +164,33 @@ export default function BookingForm() {
   const handleUseLocation = () => {
     setLocationError(null);
     setLocationLoading(true);
+    locationRequestId.current += 1;
+    const currentId = locationRequestId.current;
     if (!navigator.geolocation) {
-      setLocationError("Geolocation not supported");
+      setLocationError(t("locationErrorUnsupported"));
       setLocationLoading(false);
       return;
     }
     navigator.geolocation.getCurrentPosition(
       async (pos) => {
+        if (currentId !== locationRequestId.current) return;
         try {
           const line = await reverseGeocode(pos.coords.latitude, pos.coords.longitude);
+          if (currentId !== locationRequestId.current) return;
           update({ addressLine: line || formData.addressLine });
         } catch {
-          setLocationError("Could not get address");
+          if (currentId !== locationRequestId.current) return;
+          setLocationError(t("locationErrorFailed"));
         } finally {
-          setLocationLoading(false);
+          if (currentId === locationRequestId.current) setLocationLoading(false);
         }
       },
       () => {
-        setLocationError("Location denied or unavailable");
+        if (currentId !== locationRequestId.current) return;
+        setLocationError(t("locationErrorDenied"));
         setLocationLoading(false);
-      }
+      },
+      { timeout: 15000, maximumAge: 60000, enableHighAccuracy: false }
     );
   };
 

@@ -5,7 +5,8 @@ The hero section uses a background video so the site feels real and professional
 ## Option 1: Local file (recommended)
 
 1. Download a **free** clip that fits your services (see suggestions below).
-2. Rename it to **`hero-bg.mp4`** and put it here: `public/videos/hero-bg.mp4`.
+2. Rename it to **`hero-bg.mp4`** and put it here: `public/videos/hero-bg.mp4`.  
+   Then in **`lib/constants.ts`** bump **`HERO_VIDEO_VERSION`** (e.g. to `"3"`) so all browsers load the new video instead of a cached one.
 
 **Best search terms for a real, service-focused feel:**
 

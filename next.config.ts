@@ -4,6 +4,14 @@ import createNextIntlPlugin from "next-intl/plugin";
 const withNextIntl = createNextIntlPlugin();
 
 const nextConfig: NextConfig = {
+  images: {
+    localPatterns: [
+      {
+        pathname: "/Logo.png",
+        // search omitted so ?v=2 and any cache-bust query are allowed
+      },
+    ],
+  },
   async headers() {
     return [
       {
@@ -22,7 +30,7 @@ const nextConfig: NextConfig = {
       {
         source: "/Logo.png",
         headers: [
-          { key: "Cache-Control", value: "public, max-age=31536000, immutable" },
+          { key: "Cache-Control", value: "public, max-age=3600, must-revalidate" },
         ],
       },
     ];

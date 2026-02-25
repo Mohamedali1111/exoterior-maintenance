@@ -130,6 +130,26 @@ In your Vercel project: **Settings → Environment Variables**, add the same two
 
 Then **redeploy**. After that, slot blocking works on the live site too.
 
+### Keep Supabase active (free tier)
+
+On the **free tier**, Supabase **pauses your project after 7 days** if there is no activity. To avoid having to resume it manually every week:
+
+1. **Use a free cron / ping service** to call your site every 5–6 days so Supabase sees a request:
+   - **URL to call:** `https://your-domain.com/api/keepalive`  
+     (e.g. `https://exoterior.net/api/keepalive`)
+   - **How often:** every 5 or 6 days (e.g. “every 5 days” or “every Monday and Thursday”).
+
+2. **Suggested free services:**
+   - **[cron-job.org](https://cron-job.org)** – create a free account, add a new cron job, set the URL above, and choose “Every 5 days” or a custom interval.
+   - **[UptimeRobot](https://uptimerobot.com)** – free account, add a monitor with the URL above and set the check interval to every 5 days (or the minimum they allow; some use 5-minute checks which is more than enough).
+
+3. **Optional – lock the endpoint:**  
+   In Vercel (and `.env.local`), set **`CRON_SECRET`** to a long random string (e.g. `openssl rand -hex 24`). In the cron service, send it in the request:
+   - **Header:** `Authorization: Bearer YOUR_CRON_SECRET`  
+   Then only requests with that header will be accepted, so random visitors can’t trigger the keep-alive.
+
+After this is set up, Supabase should stop pausing your project.
+
 ## Deploy on Vercel
 
 The app is ready to deploy on Vercel. No code edits needed.
@@ -139,6 +159,7 @@ The app is ready to deploy on Vercel. No code edits needed.
    - **Required:** `NEXT_PUBLIC_FORMSUBMIT_EMAIL` = your email (so form submissions go to you).
    - **Optional:** `NEXT_PUBLIC_FORMSUBMIT_EMAIL_SECONDARY` = second recipient (e.g. Mohamed Ali); both get every booking.
    - **Optional (for slot blocking):** `NEXT_PUBLIC_SUPABASE_URL` and `SUPABASE_SERVICE_ROLE_KEY`.
+   - **Optional (for keep-alive):** `CRON_SECRET` if you want to protect `/api/keepalive` (see **Keep Supabase active**).
 3. Redeploy.
 
 FormSubmit works from your Vercel domain. If you use a new email with FormSubmit, check your inbox and click the activation link once.
@@ -150,5 +171,6 @@ FormSubmit works from your Vercel domain. If you use a new email with FormSubmit
 - [ ] Set `NEXT_PUBLIC_FORMSUBMIT_EMAIL` (and optional second email) in Vercel Environment Variables.
 - [ ] Activate each FormSubmit email (click the link in the first confirmation email).
 - [ ] Optional: Add Supabase for slot blocking (see above); set `NEXT_PUBLIC_SUPABASE_URL` and `SUPABASE_SERVICE_ROLE_KEY` in Vercel.
+- [ ] If using Supabase free tier: set up a cron/ping (e.g. cron-job.org) to call `https://your-domain.com/api/keepalive` every 5–6 days so the project doesn’t pause (see **Keep Supabase active** above).
 - [ ] Connect your domain in Vercel (Settings → Domains) and point your DNS (e.g. GoDaddy) to Vercel.
 - [ ] Replace `public/Logo.png` and `public/videos/hero-bg.mp4` if you use your own assets (see `public/videos/README.md` for video).

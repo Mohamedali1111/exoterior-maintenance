@@ -1,3 +1,9 @@
+/** Logo path. Bump the query (e.g. ?v=3) when you replace Logo.png so all browsers load the new image. */
+export const LOGO_SRC = "/Logo.png?v=2";
+
+/** Hero video cache bust. Bump (e.g. ?v=3) when you replace public/videos/hero-bg.mp4 so all browsers load the new video. */
+export const HERO_VIDEO_VERSION = "2";
+
 /** Email where booking requests are sent (FormSubmit). Set in .env.local / Vercel: NEXT_PUBLIC_FORMSUBMIT_EMAIL */
 export const FORMSUBMIT_EMAIL =
   typeof process.env.NEXT_PUBLIC_FORMSUBMIT_EMAIL === "string" && process.env.NEXT_PUBLIC_FORMSUBMIT_EMAIL.length > 0

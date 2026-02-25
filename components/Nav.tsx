@@ -3,6 +3,7 @@
 import Image from "next/image";
 import { useTranslations, useLocale } from "next-intl";
 import { Link } from "@/i18n/navigation";
+import { LOGO_SRC } from "@/lib/constants";
 
 const navLinks = [
   { key: "services", href: "#services" },
@@ -26,7 +27,7 @@ export default function Nav() {
           aria-label="Exoterior – Home"
         >
           <Image
-            src="/Logo.png"
+            src={LOGO_SRC}
             alt="Exoterior"
             width={160}
             height={44}
@@ -49,29 +50,32 @@ export default function Nav() {
           <div
             className="flex rounded-full bg-neutral-800/90 p-0.5 ring-1 ring-neutral-600/50 ms-2 me-2 sm:ms-6 sm:me-6 md:ms-8 md:me-8"
             role="group"
-            aria-label="Language"
+            aria-label={isAr ? "اللغة" : "Language"}
           >
             <Link
               href="/"
               locale="en"
-              className={`flex min-h-[36px] min-w-[38px] sm:min-h-[40px] sm:min-w-[44px] items-center justify-center rounded-full px-2.5 sm:px-3.5 text-xs sm:text-sm font-medium transition-all duration-200 active:scale-95 ${
+              className={`flex min-h-[38px] min-w-[42px] sm:min-h-[40px] sm:min-w-[48px] items-center justify-center rounded-full px-3 sm:px-4 text-xs sm:text-sm font-semibold transition-all duration-200 active:scale-95 ${
                 !isAr
-                  ? "bg-red-600 text-white shadow-inner"
-                  : "text-neutral-400 hover:text-white"
+                  ? "bg-red-600 text-white shadow-inner ring-1 ring-red-500/30"
+                  : "text-neutral-400 hover:bg-white/5 hover:text-white"
               }`}
+              aria-current={!isAr ? "true" : undefined}
             >
-              EN
+              {isAr ? t("langSwitch") : "EN"}
             </Link>
             <Link
               href="/"
               locale="ar"
-              className={`flex min-h-[36px] min-w-[38px] sm:min-h-[40px] sm:min-w-[44px] items-center justify-center rounded-full px-2.5 sm:px-3.5 text-xs sm:text-sm font-medium transition-all duration-200 active:scale-95 ${
+              className={`flex min-h-[38px] min-w-[42px] sm:min-h-[40px] sm:min-w-[48px] items-center justify-center rounded-full px-3 sm:px-4 text-xs sm:text-sm font-semibold transition-all duration-200 active:scale-95 ${
                 isAr
-                  ? "bg-red-600 text-white shadow-inner"
-                  : "text-neutral-400 hover:text-white"
+                  ? "bg-red-600 text-white shadow-inner ring-1 ring-red-500/30"
+                  : "text-neutral-400 hover:bg-white/5 hover:text-white"
               }`}
+              aria-current={isAr ? "true" : undefined}
+              title={isAr ? undefined : "العربية"}
             >
-              AR
+              ع
             </Link>
           </div>
           <a

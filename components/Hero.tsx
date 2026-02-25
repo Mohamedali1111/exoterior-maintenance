@@ -3,12 +3,13 @@
 import Image from "next/image";
 import { useTranslations } from "next-intl";
 import { useRef, useEffect, useState } from "react";
+import { LOGO_SRC, HERO_VIDEO_VERSION } from "@/lib/constants";
 
 const HERO_VIDEO_SRC =
   typeof process.env.NEXT_PUBLIC_HERO_VIDEO_URL === "string" &&
   process.env.NEXT_PUBLIC_HERO_VIDEO_URL.length > 0
     ? process.env.NEXT_PUBLIC_HERO_VIDEO_URL
-    : "/videos/hero-bg.mp4";
+    : `/videos/hero-bg.mp4?v=${HERO_VIDEO_VERSION}`;
 
 /** Optional: show this image until the video plays. Add public/videos/hero-poster.jpg for instant hero. */
 const HERO_VIDEO_POSTER = "/videos/hero-poster.jpg";
@@ -88,7 +89,7 @@ export default function Hero() {
       <div className="relative z-10 mx-auto flex min-h-[35vh] max-w-3xl flex-col items-center justify-center text-center sm:min-h-[50vh]">
         <h1 className="animate-[fade-in-up_0.7s_ease-out_both]">
           <Image
-            src="/Logo.png"
+            src={LOGO_SRC}
             alt="Exoterior"
             width={320}
             height={120}
