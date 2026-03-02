@@ -61,7 +61,7 @@ export async function POST(request: NextRequest) {
 
   if (date < getMinBookingDateStr()) {
     return NextResponse.json(
-      { error: "Please choose today or a future date" },
+      { error: "Booking opens from 1 April 2026. Please choose 1 April 2026 or a later date." },
       { status: 400 }
     );
   }
