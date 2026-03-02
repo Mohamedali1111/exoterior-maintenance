@@ -87,6 +87,8 @@ export default function BookingForm() {
   const formScrollRef = useRef<HTMLDivElement>(null);
   const isFirstRender = useRef(true);
   const locationRequestId = useRef(0);
+  const servicesKey = formData.subServices.join(",");
+  const hasServices = formData.subServices.length > 0;
 
   useEffect(() => {
     if (!formData.appointmentDate) {
@@ -95,7 +97,11 @@ export default function BookingForm() {
       return;
     }
     setSlotsLoading(true);
-    fetch(`/api/slots?date=${formData.appointmentDate}`)
+    const params = new URLSearchParams({ date: formData.appointmentDate });
+    if (hasServices) {
+      params.set("services", servicesKey);
+    }
+    fetch(`/api/slots?${params.toString()}`)
       .then((r) => r.json())
       .then((data) => {
         setTakenSlots(data.taken ?? []);
@@ -106,7 +112,7 @@ export default function BookingForm() {
         setSlotStorageActive(false);
       })
       .finally(() => setSlotsLoading(false));
-  }, [formData.appointmentDate]);
+  }, [formData.appointmentDate, servicesKey, hasServices]);
 
   useEffect(() => {
     if (isFirstRender.current) {
@@ -210,7 +216,11 @@ export default function BookingForm() {
     setSubmitLoading(true);
     try {
       // Recheck slot right before submit to avoid double-book (when storage is active)
-      const slotsRes = await fetch(`/api/slots?date=${formData.appointmentDate}`);
+      const params = new URLSearchParams({ date: formData.appointmentDate });
+      if (formData.subServices.length > 0) {
+        params.set("services", formData.subServices.join(","));
+      }
+      const slotsRes = await fetch(`/api/slots?${params.toString()}`);
       const slotsData = await slotsRes.json().catch(() => ({}));
       const taken = slotsData.taken ?? [];
       if (taken.includes(formData.appointmentTime)) {
