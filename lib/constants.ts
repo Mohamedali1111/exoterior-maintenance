@@ -26,6 +26,9 @@ export const APPOINTMENT_TIME_SLOTS = [
 ] as const;
 export type AppointmentTimeSlot = (typeof APPOINTMENT_TIME_SLOTS)[number];
 
+/** Official launch date for bookings (YYYY-MM-DD). Before this, users can only book from this date onwards. */
+export const APPOINTMENT_LAUNCH_DATE = "2026-04-01";
+
 /** Returns end time for a slot (1 hour later). e.g. "12:00" -> "13:00" */
 export function slotEndTime(slot: string): string {
   const [h, m] = slot.split(":").map(Number);
@@ -47,11 +50,18 @@ export function formatSlotLabel(slot: string): string {
 /** How many days ahead users can book (from min date). */
 export const APPOINTMENT_DAYS_AHEAD = 60;
 
-/** First bookable date is today. Returns min date as YYYY-MM-DD (local date). */
+/**
+ * First bookable date.
+ * - Before launch: minimum is the launch date (APPOINTMENT_LAUNCH_DATE).
+ * - After launch: minimum is "today" so users can't book in the past.
+ * Returns YYYY-MM-DD in local time.
+ */
 export function getMinBookingDateStr(): string {
-  const now = new Date();
-  const y = now.getFullYear();
-  const m = now.getMonth();
-  const d = now.getDate();
+  const today = new Date();
+  const launch = new Date(`${APPOINTMENT_LAUNCH_DATE}T00:00:00`);
+  const base = today < launch ? launch : today;
+  const y = base.getFullYear();
+  const m = base.getMonth();
+  const d = base.getDate();
   return `${y}-${(m + 1).toString().padStart(2, "0")}-${d.toString().padStart(2, "0")}`;
 }

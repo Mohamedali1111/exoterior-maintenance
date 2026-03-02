@@ -5,6 +5,8 @@ import { MAIN_SERVICES } from "@/lib/services";
 
 export const dynamic = "force-dynamic";
 
+const MAX_BOOKINGS_PER_SLOT = 2;
+
 /** Reasonable max lengths to prevent abuse (not for XSS – React escapes; for storage/DoS). */
 const MAX_FULL_NAME = 200;
 const MAX_ADDRESS = 500;
@@ -94,6 +96,25 @@ export async function POST(request: NextRequest) {
   const supabase = getSupabaseServer();
   if (!supabase) {
     return NextResponse.json({ booked: true }, { status: 201 });
+  }
+
+  // Enforce a maximum number of bookings per time slot before inserting.
+  const { data: existingSlotBookings, error: existingError } = await supabase
+    .from("appointments")
+    .select("id")
+    .eq("date", date)
+    .eq("time_slot", timeSlot);
+
+  if (existingError) {
+    return NextResponse.json({ error: "Failed to check slot availability" }, { status: 500 });
+  }
+
+  const existingCount = (existingSlotBookings ?? []).length;
+  if (existingCount >= MAX_BOOKINGS_PER_SLOT) {
+    return NextResponse.json(
+      { error: "Slot already booked", conflict: true },
+      { status: 409 }
+    );
   }
 
   const { error } = await supabase.from("appointments").insert({

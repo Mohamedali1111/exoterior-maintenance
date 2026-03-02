@@ -23,6 +23,16 @@ export async function GET(request: NextRequest) {
     return NextResponse.json({ taken: [], storage: true }, { status: 200 });
   }
 
-  const taken = (data ?? []).map((r) => r.time_slot as string);
+  const MAX_BOOKINGS_PER_SLOT = 2;
+  const counts = new Map<string, number>();
+  for (const row of data ?? []) {
+    const slot = row.time_slot as string;
+    counts.set(slot, (counts.get(slot) ?? 0) + 1);
+  }
+  // A slot is considered "taken" only when it has reached capacity
+  const taken = Array.from(counts.entries())
+    .filter(([, count]) => count >= MAX_BOOKINGS_PER_SLOT)
+    .map(([slot]) => slot);
+
   return NextResponse.json({ taken, storage: true });
 }
