@@ -1,6 +1,11 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getSupabaseServer } from "@/lib/supabase-server";
-import { getMinBookingDateStr, APPOINTMENT_TIME_SLOTS, EGYPT_PHONE_REGEX } from "@/lib/constants";
+import {
+  getMinBookingDateStr,
+  APPOINTMENT_TIME_SLOTS,
+  EGYPT_PHONE_REGEX,
+  isFridayClosedDate,
+} from "@/lib/constants";
 import { MAIN_SERVICES } from "@/lib/services";
 
 export const dynamic = "force-dynamic";
@@ -62,6 +67,13 @@ export async function POST(request: NextRequest) {
   if (date < getMinBookingDateStr()) {
     return NextResponse.json(
       { error: "Booking opens from 1 April 2026. Please choose 1 April 2026 or a later date." },
+      { status: 400 }
+    );
+  }
+
+  if (isFridayClosedDate(date)) {
+    return NextResponse.json(
+      { error: "We are closed on Fridays. Please choose another day." },
       { status: 400 }
     );
   }

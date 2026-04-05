@@ -7,11 +7,13 @@ import {
   EGYPT_PHONE_REGEX,
   FORMSUBMIT_EMAIL,
   FORMSUBMIT_EMAIL_SECONDARY,
+  FORMSUBMIT_EMAIL_EXTRA,
   APPOINTMENT_TIME_SLOTS,
   APPOINTMENT_DAYS_AHEAD,
   slotEndTime,
   formatSlotLabel,
   getMinBookingDateStr,
+  isFridayClosedDate,
 } from "@/lib/constants";
 
 const STEPS = 4;
@@ -96,6 +98,12 @@ export default function BookingForm() {
       setSlotStorageActive(null);
       return;
     }
+    if (isFridayClosedDate(formData.appointmentDate)) {
+      setTakenSlots([]);
+      setSlotStorageActive(true);
+      setSlotsLoading(false);
+      return;
+    }
     setSlotsLoading(true);
     const params = new URLSearchParams({ date: formData.appointmentDate });
     if (hasServices) {
@@ -153,9 +161,13 @@ export default function BookingForm() {
     const minDate = getMinBookingDateStr();
     if (!formData.appointmentDate) e.appointmentDate = t("validation.dateRequired");
     else if (formData.appointmentDate < minDate) e.appointmentDate = t("validation.dateBeforeMin");
-    if (!formData.appointmentTime) e.appointmentTime = t("validation.timeRequired");
-    if (formData.appointmentDate && formData.appointmentTime && takenSlots.includes(formData.appointmentTime))
-      e.appointmentTime = t("validation.slotTaken");
+    else if (isFridayClosedDate(formData.appointmentDate)) e.appointmentDate = t("validation.fridayClosed");
+    const fridayClosed = Boolean(formData.appointmentDate && isFridayClosedDate(formData.appointmentDate));
+    if (!fridayClosed) {
+      if (!formData.appointmentTime) e.appointmentTime = t("validation.timeRequired");
+      if (formData.appointmentDate && formData.appointmentTime && takenSlots.includes(formData.appointmentTime))
+        e.appointmentTime = t("validation.slotTaken");
+    }
     setErrors(e);
     return Object.keys(e).length === 0;
   };
@@ -215,6 +227,11 @@ export default function BookingForm() {
     setSubmitError(null);
     setSubmitLoading(true);
     try {
+      if (isFridayClosedDate(formData.appointmentDate)) {
+        setSubmitError(t("validation.fridayClosed"));
+        setSubmitLoading(false);
+        return;
+      }
       // Recheck slot right before submit to avoid double-book (when storage is active)
       const params = new URLSearchParams({ date: formData.appointmentDate });
       if (formData.subServices.length > 0) {
@@ -287,11 +304,22 @@ export default function BookingForm() {
         return body;
       };
 
-      const sendToExoterior = fetch(`https://formsubmit.co/${FORMSUBMIT_EMAIL}`, { method: "POST", body: buildEmailBody() });
-      const sendToMohamed = FORMSUBMIT_EMAIL_SECONDARY
-        ? fetch(`https://formsubmit.co/${FORMSUBMIT_EMAIL_SECONDARY}`, { method: "POST", body: buildEmailBody() })
-        : Promise.resolve();
-      await Promise.all([sendToExoterior, sendToMohamed]);
+      const primaryLc = FORMSUBMIT_EMAIL.trim().toLowerCase();
+      const secondaryLc = FORMSUBMIT_EMAIL_SECONDARY?.trim().toLowerCase() ?? null;
+      const sends: Promise<Response>[] = [
+        fetch(`https://formsubmit.co/${FORMSUBMIT_EMAIL}`, { method: "POST", body: buildEmailBody() }),
+      ];
+      if (FORMSUBMIT_EMAIL_SECONDARY) {
+        sends.push(
+          fetch(`https://formsubmit.co/${FORMSUBMIT_EMAIL_SECONDARY}`, { method: "POST", body: buildEmailBody() })
+        );
+      }
+      for (const extra of FORMSUBMIT_EMAIL_EXTRA) {
+        const el = extra.trim().toLowerCase();
+        if (!el || el === primaryLc || el === secondaryLc) continue;
+        sends.push(fetch(`https://formsubmit.co/${extra.trim()}`, { method: "POST", body: buildEmailBody() }));
+      }
+      await Promise.all(sends);
       setSubmitted(true);
     } catch {
       setSubmitError(t("validation.submitFailed"));
@@ -510,7 +538,13 @@ export default function BookingForm() {
                 <label htmlFor="booking-date" className="block text-xs sm:text-sm font-medium text-neutral-300 text-start mb-1">
                   {t("pickDate")}
                 </label>
-                <div className="relative w-full min-w-0 max-w-full overflow-hidden rounded-lg sm:rounded-xl border border-white/12 bg-white/5 focus-within:border-red-500 focus-within:ring-2 focus-within:ring-red-500/30 [color-scheme:dark]">
+                <div
+                  className={`relative w-full min-w-0 max-w-full overflow-hidden rounded-lg sm:rounded-xl border bg-white/5 focus-within:ring-2 [color-scheme:dark] ${
+                    formData.appointmentDate && isFridayClosedDate(formData.appointmentDate)
+                      ? "border-red-500/45 ring-2 ring-red-500/25 focus-within:border-red-500"
+                      : "border-white/12 focus-within:border-red-500 focus-within:ring-2 focus-within:ring-red-500/30"
+                  }`}
+                >
                   <input
                     id="booking-date"
                     type="date"
@@ -550,6 +584,24 @@ export default function BookingForm() {
                 </label>
                 {!formData.appointmentDate ? (
                   <p className="mt-1.5 text-xs text-neutral-500 text-start">{t("pickDateFirst")}</p>
+                ) : isFridayClosedDate(formData.appointmentDate) ? (
+                  <div
+                    className="mt-2 rounded-xl border border-red-500/40 bg-gradient-to-br from-red-950/50 to-red-950/20 px-3 py-3 sm:px-4 sm:py-4 shadow-[0_0_32px_rgba(220,38,38,0.12)]"
+                    role="status"
+                  >
+                    <div className="flex gap-3 min-w-0">
+                      <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-red-600/20 ring-1 ring-red-500/35" aria-hidden>
+                        <svg className="h-5 w-5 text-red-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                          <circle cx="12" cy="12" r="10" />
+                          <line x1="4.93" y1="4.93" x2="19.07" y2="19.07" />
+                        </svg>
+                      </div>
+                      <div className="min-w-0 pt-0.5 text-start">
+                        <p className="text-sm font-semibold text-red-300">{t("fridayClosedSelectedTitle")}</p>
+                        <p className="mt-1 text-xs leading-relaxed text-red-200/90">{t("validation.fridayClosed")}</p>
+                      </div>
+                    </div>
+                  </div>
                 ) : (
                   <>
                     {slotsLoading && (

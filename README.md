@@ -12,7 +12,7 @@ This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-
    The first time FormSubmit gets a submission to that email, it will send an **activation link** – click it once. After that, all bookings go to that inbox.
 
 3. **When you deploy (e.g. Vercel)**  
-   In **Settings → Environment Variables**, add `NEXT_PUBLIC_FORMSUBMIT_EMAIL` (and optionally `NEXT_PUBLIC_FORMSUBMIT_EMAIL_SECONDARY` for a second recipient). Redeploy. Activate the email via FormSubmit’s link if it’s the first time.
+   In your project on Vercel: **Settings → Environment Variables**. Add at least `NEXT_PUBLIC_FORMSUBMIT_EMAIL`. Optionally add `NEXT_PUBLIC_FORMSUBMIT_EMAIL_SECONDARY` (second inbox) and/or `NEXT_PUBLIC_FORMSUBMIT_EMAIL_EXTRA` (comma-separated list for more inboxes, e.g. `komi_007@hotmail.com`). Apply to **Production** (and Preview if you want). **Redeploy** so the new values are baked into the build. Activate each new address once via FormSubmit’s email link.
 
 No database is required for the form to work. For slot blocking (prevent double-booking), see *How to enable Supabase* below.
 
@@ -38,7 +38,7 @@ Open [http://localhost:3000](http://localhost:3000) with your browser to see the
 - `app/[locale]/page.tsx` – main page layout and sections
 - `components/` – Nav, Hero, BookingForm, Footer, etc.
 - `messages/en.json` and `messages/ar.json` – all visible text (EN/AR)
-- `lib/constants.ts` – time slots, booking rules, env-based config
+- `lib/constants.ts` – time slots, booking rules (launch date, **Fridays closed**), env-based config
 - `public/Logo.png` – logo; `public/videos/hero-bg.mp4` – hero video (see `public/videos/README.md`)
 - Never commit `.env.local`; use `.env.example` as a template.
 
@@ -72,6 +72,8 @@ Booking submissions are sent to **your email** via [FormSubmit](https://formsubm
 After that, every booking (name, phone, address, appointment date/time, services, notes) is emailed to you.
 
 **Send to two addresses (e.g. Exoterior + Mohamed Ali):** set `NEXT_PUBLIC_FORMSUBMIT_EMAIL` to the main address and `NEXT_PUBLIC_FORMSUBMIT_EMAIL_SECONDARY` to the second. Both receive the same email. Activate each address once via FormSubmit’s link.
+
+**More addresses (e.g. third inbox on Vercel):** set `NEXT_PUBLIC_FORMSUBMIT_EMAIL_EXTRA` to one email or several separated by commas (`a@b.com,c@d.com`). Same booking email is POSTed to FormSubmit for each. Each address must be activated once in FormSubmit when first used.
 
 ## How to enable Supabase (slot blocking)
 
@@ -157,7 +159,7 @@ The app is ready to deploy on Vercel. No code edits needed.
 1. Push your repo and import the project in [Vercel](https://vercel.com).
 2. In the project **Settings → Environment Variables**, add:
    - **Required:** `NEXT_PUBLIC_FORMSUBMIT_EMAIL` = your email (so form submissions go to you).
-   - **Optional:** `NEXT_PUBLIC_FORMSUBMIT_EMAIL_SECONDARY` = second recipient (e.g. Mohamed Ali); both get every booking.
+   - **Optional:** `NEXT_PUBLIC_FORMSUBMIT_EMAIL_SECONDARY` = second recipient; `NEXT_PUBLIC_FORMSUBMIT_EMAIL_EXTRA` = comma-separated extra recipients.
    - **Optional (for slot blocking):** `NEXT_PUBLIC_SUPABASE_URL` and `SUPABASE_SERVICE_ROLE_KEY`.
    - **Optional (for keep-alive):** `CRON_SECRET` if you want to protect `/api/keepalive` (see **Keep Supabase active**).
 3. Redeploy.
@@ -168,7 +170,7 @@ FormSubmit works from your Vercel domain. If you use a new email with FormSubmit
 
 ## Before you go live (checklist)
 
-- [ ] Set `NEXT_PUBLIC_FORMSUBMIT_EMAIL` (and optional second email) in Vercel Environment Variables.
+- [ ] Set `NEXT_PUBLIC_FORMSUBMIT_EMAIL` (and optional `SECONDARY` / `EXTRA`) in Vercel Environment Variables; redeploy.
 - [ ] Activate each FormSubmit email (click the link in the first confirmation email).
 - [ ] Optional: Add Supabase for slot blocking (see above); set `NEXT_PUBLIC_SUPABASE_URL` and `SUPABASE_SERVICE_ROLE_KEY` in Vercel.
 - [ ] If using Supabase free tier: set up a cron/ping (e.g. cron-job.org) to call `https://your-domain.com/api/keepalive` every 5–6 days so the project doesn’t pause (see **Keep Supabase active** above).

@@ -17,6 +17,24 @@ export const FORMSUBMIT_EMAIL_SECONDARY =
     ? process.env.NEXT_PUBLIC_FORMSUBMIT_EMAIL_SECONDARY
     : null;
 
+function parseFormSubmitExtraEmails(raw: string | undefined): string[] {
+  if (!raw || typeof raw !== "string") return [];
+  return raw
+    .split(/[,;]+/)
+    .map((e) => e.trim())
+    .filter((e) => e.length > 0);
+}
+
+/**
+ * Extra FormSubmit recipients (same booking email as primary). Comma-separated in env.
+ * Vercel: Project → Settings → Environment Variables → `NEXT_PUBLIC_FORMSUBMIT_EMAIL_EXTRA`
+ */
+export const FORMSUBMIT_EMAIL_EXTRA = parseFormSubmitExtraEmails(
+  typeof process.env.NEXT_PUBLIC_FORMSUBMIT_EMAIL_EXTRA === "string"
+    ? process.env.NEXT_PUBLIC_FORMSUBMIT_EMAIL_EXTRA
+    : undefined
+);
+
 /** Egypt mobile: 01 + 9 digits */
 export const EGYPT_PHONE_REGEX = /^01[0-9]{9}$/;
 
@@ -50,16 +68,27 @@ export function formatSlotLabel(slot: string): string {
 /** How many days ahead users can book (from min date). */
 export const APPOINTMENT_DAYS_AHEAD = 60;
 
+/** True if this calendar day is Friday (local). `dateStr` must be YYYY-MM-DD. */
+export function isFridayClosedDate(dateStr: string): boolean {
+  if (!/^\d{4}-\d{2}-\d{2}$/.test(dateStr)) return false;
+  return new Date(`${dateStr}T12:00:00`).getDay() === 5;
+}
+
 /**
  * First bookable date.
  * - Before launch: minimum is the launch date (APPOINTMENT_LAUNCH_DATE).
  * - After launch: minimum is "today" so users can't book in the past.
+ * - Fridays are always closed: if the computed minimum falls on a Friday, use the next Saturday.
  * Returns YYYY-MM-DD in local time.
  */
 export function getMinBookingDateStr(): string {
-  const today = new Date();
-  const launch = new Date(`${APPOINTMENT_LAUNCH_DATE}T00:00:00`);
-  const base = today < launch ? launch : today;
+  const launch = new Date(`${APPOINTMENT_LAUNCH_DATE}T12:00:00`);
+  let base = new Date();
+  base.setHours(12, 0, 0, 0);
+  if (base < launch) base = new Date(launch);
+  while (base.getDay() === 5) {
+    base.setDate(base.getDate() + 1);
+  }
   const y = base.getFullYear();
   const m = base.getMonth();
   const d = base.getDate();

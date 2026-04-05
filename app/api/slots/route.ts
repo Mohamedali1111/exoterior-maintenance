@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getSupabaseServer } from "@/lib/supabase-server";
+import { APPOINTMENT_TIME_SLOTS, isFridayClosedDate } from "@/lib/constants";
 
 export const dynamic = "force-dynamic";
 
@@ -15,6 +16,10 @@ export async function GET(request: NextRequest) {
 
   if (!date || !/^\d{4}-\d{2}-\d{2}$/.test(date)) {
     return NextResponse.json({ taken: [], storage: false }, { status: 200 });
+  }
+
+  if (isFridayClosedDate(date)) {
+    return NextResponse.json({ taken: [...APPOINTMENT_TIME_SLOTS], storage: true }, { status: 200 });
   }
 
   const supabase = getSupabaseServer();
