@@ -13,7 +13,7 @@ import {
   slotEndTime,
   formatSlotLabel,
   getMinBookingDateStr,
-  isFridayClosedDate,
+  isClosedBookingDate,
 } from "@/lib/constants";
 
 const STEPS = 4;
@@ -98,7 +98,7 @@ export default function BookingForm() {
       setSlotStorageActive(null);
       return;
     }
-    if (isFridayClosedDate(formData.appointmentDate)) {
+    if (isClosedBookingDate(formData.appointmentDate)) {
       setTakenSlots([]);
       setSlotStorageActive(true);
       setSlotsLoading(false);
@@ -161,9 +161,9 @@ export default function BookingForm() {
     const minDate = getMinBookingDateStr();
     if (!formData.appointmentDate) e.appointmentDate = t("validation.dateRequired");
     else if (formData.appointmentDate < minDate) e.appointmentDate = t("validation.dateBeforeMin");
-    else if (isFridayClosedDate(formData.appointmentDate)) e.appointmentDate = t("validation.fridayClosed");
-    const fridayClosed = Boolean(formData.appointmentDate && isFridayClosedDate(formData.appointmentDate));
-    if (!fridayClosed) {
+    else if (isClosedBookingDate(formData.appointmentDate)) e.appointmentDate = t("validation.closedDate");
+    const closedDate = Boolean(formData.appointmentDate && isClosedBookingDate(formData.appointmentDate));
+    if (!closedDate) {
       if (!formData.appointmentTime) e.appointmentTime = t("validation.timeRequired");
       if (formData.appointmentDate && formData.appointmentTime && takenSlots.includes(formData.appointmentTime))
         e.appointmentTime = t("validation.slotTaken");
@@ -227,8 +227,8 @@ export default function BookingForm() {
     setSubmitError(null);
     setSubmitLoading(true);
     try {
-      if (isFridayClosedDate(formData.appointmentDate)) {
-        setSubmitError(t("validation.fridayClosed"));
+      if (isClosedBookingDate(formData.appointmentDate)) {
+        setSubmitError(t("validation.closedDate"));
         setSubmitLoading(false);
         return;
       }
@@ -540,7 +540,7 @@ export default function BookingForm() {
                 </label>
                 <div
                   className={`relative w-full min-w-0 max-w-full overflow-hidden rounded-lg sm:rounded-xl border bg-white/5 focus-within:ring-2 [color-scheme:dark] ${
-                    formData.appointmentDate && isFridayClosedDate(formData.appointmentDate)
+                    formData.appointmentDate && isClosedBookingDate(formData.appointmentDate)
                       ? "border-red-500/45 ring-2 ring-red-500/25 focus-within:border-red-500"
                       : "border-white/12 focus-within:border-red-500 focus-within:ring-2 focus-within:ring-red-500/30"
                   }`}
@@ -584,7 +584,7 @@ export default function BookingForm() {
                 </label>
                 {!formData.appointmentDate ? (
                   <p className="mt-1.5 text-xs text-neutral-500 text-start">{t("pickDateFirst")}</p>
-                ) : isFridayClosedDate(formData.appointmentDate) ? (
+                ) : isClosedBookingDate(formData.appointmentDate) ? (
                   <div
                     className="mt-2 rounded-xl border border-red-500/40 bg-gradient-to-br from-red-950/50 to-red-950/20 px-3 py-3 sm:px-4 sm:py-4 shadow-[0_0_32px_rgba(220,38,38,0.12)]"
                     role="status"
@@ -597,8 +597,8 @@ export default function BookingForm() {
                         </svg>
                       </div>
                       <div className="min-w-0 pt-0.5 text-start">
-                        <p className="text-sm font-semibold text-red-300">{t("fridayClosedSelectedTitle")}</p>
-                        <p className="mt-1 text-xs leading-relaxed text-red-200/90">{t("validation.fridayClosed")}</p>
+                        <p className="text-sm font-semibold text-red-300">{t("closedDateSelectedTitle")}</p>
+                        <p className="mt-1 text-xs leading-relaxed text-red-200/90">{t("validation.closedDate")}</p>
                       </div>
                     </div>
                   </div>

@@ -46,6 +46,9 @@ export type AppointmentTimeSlot = (typeof APPOINTMENT_TIME_SLOTS)[number];
 
 /** Official launch date for bookings (YYYY-MM-DD). Before this, users can only book from this date onwards. */
 export const APPOINTMENT_LAUNCH_DATE = "2026-04-01";
+export const APPOINTMENT_BLOCKED_RANGES = [
+  { start: "2026-04-21", end: "2026-04-26" },
+] as const;
 
 /** Returns end time for a slot (1 hour later). e.g. "12:00" -> "13:00" */
 export function slotEndTime(slot: string): string {
@@ -74,11 +77,22 @@ export function isFridayClosedDate(dateStr: string): boolean {
   return new Date(`${dateStr}T12:00:00`).getDay() === 5;
 }
 
+/** True if the date falls inside any blocked range (inclusive). */
+export function isBlockedRangeDate(dateStr: string): boolean {
+  if (!/^\d{4}-\d{2}-\d{2}$/.test(dateStr)) return false;
+  return APPOINTMENT_BLOCKED_RANGES.some((r) => dateStr >= r.start && dateStr <= r.end);
+}
+
+/** Any closed booking date (weekly closures + temporary blocked ranges). */
+export function isClosedBookingDate(dateStr: string): boolean {
+  return isFridayClosedDate(dateStr) || isBlockedRangeDate(dateStr);
+}
+
 /**
  * First bookable date.
  * - Before launch: minimum is the launch date (APPOINTMENT_LAUNCH_DATE).
  * - After launch: minimum is "today" so users can't book in the past.
- * - Fridays are always closed: if the computed minimum falls on a Friday, use the next Saturday.
+ * - Closed days are skipped (Fridays + blocked ranges).
  * Returns YYYY-MM-DD in local time.
  */
 export function getMinBookingDateStr(): string {
@@ -86,7 +100,7 @@ export function getMinBookingDateStr(): string {
   let base = new Date();
   base.setHours(12, 0, 0, 0);
   if (base < launch) base = new Date(launch);
-  while (base.getDay() === 5) {
+  while (isClosedBookingDate(`${base.getFullYear()}-${(base.getMonth() + 1).toString().padStart(2, "0")}-${base.getDate().toString().padStart(2, "0")}`)) {
     base.setDate(base.getDate() + 1);
   }
   const y = base.getFullYear();
