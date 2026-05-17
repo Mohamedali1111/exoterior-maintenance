@@ -11,6 +11,8 @@ import {
   formatSlotLabel,
   getMinBookingDateStr,
   isClosedBookingDate,
+  WEB3FORMS_ACCESS_KEY,
+  WEB3FORMS_CONFIGURED,
 } from "@/lib/constants";
 
 const STEPS = 4;
@@ -38,6 +40,22 @@ const initialFormData: FormData = {
 type Errors = Partial<Record<keyof FormData, string>>;
 
 const NOMINATIM_TIMEOUT_MS = 10000;
+
+/** Web3Forms must run in the browser (server requests are blocked by Cloudflare). */
+async function submitWeb3Forms(accessKey: string, fields: Record<string, string>): Promise<boolean> {
+  const formData = new FormData();
+  formData.append("access_key", accessKey);
+  for (const [key, value] of Object.entries(fields)) {
+    formData.append(key, value);
+  }
+  try {
+    const response = await fetch("https://api.web3forms.com/submit", { method: "POST", body: formData });
+    const data = (await response.json()) as { success?: boolean };
+    return response.ok && data.success === true;
+  } catch {
+    return false;
+  }
+}
 
 async function reverseGeocode(lat: number, lon: number): Promise<string> {
   const url = `https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lon}&zoom=18&addressdetails=1`;
@@ -78,6 +96,7 @@ export default function BookingForm() {
   const [locationLoading, setLocationLoading] = useState(false);
   const [locationError, setLocationError] = useState<string | null>(null);
   const [submitted, setSubmitted] = useState(false);
+  const [emailWarning, setEmailWarning] = useState(false);
   const [submitLoading, setSubmitLoading] = useState(false);
   const [submitError, setSubmitError] = useState<string | null>(null);
   const [takenSlots, setTakenSlots] = useState<string[]>([]);
@@ -274,6 +293,43 @@ export default function BookingForm() {
         return;
       }
 
+      if (!WEB3FORMS_CONFIGURED) {
+        setSubmitError(t("validation.web3formsNotConfigured"));
+        setSubmitLoading(false);
+        return;
+      }
+
+      const servicesList =
+        formData.subServices.length > 0
+          ? formData.subServices.map((s) => tServices(`main.${s}`)).join(", ")
+          : locale === "ar"
+            ? "غير محدد"
+            : "Not specified";
+      const appointmentDateFormatted = new Date(formData.appointmentDate + "T12:00:00").toLocaleDateString(
+        locale === "ar" ? "ar-EG" : "en-GB",
+        { weekday: "long", day: "numeric", month: "long", year: "numeric" }
+      );
+      const slotEnd = slotEndTime(formData.appointmentTime);
+
+      const emailOk = await submitWeb3Forms(WEB3FORMS_ACCESS_KEY, {
+        subject:
+          "Exoterior – Booking: " +
+          formData.appointmentDate +
+          " at " +
+          formatSlotLabel(formData.appointmentTime) +
+          " – " +
+          formData.fullName,
+        name: formData.fullName,
+        phone: formData.phone,
+        address: formData.addressLine,
+        services: servicesList,
+        message: formData.notes.trim() || "(none)",
+        appointment_date: appointmentDateFormatted,
+        appointment_time:
+          formatSlotLabel(formData.appointmentTime) + " – " + formatSlotLabel(slotEnd) + " (1 hour)",
+      });
+
+      setEmailWarning(!emailOk);
       setSubmitted(true);
     } catch {
       setSubmitError(t("validation.submitFailed"));
@@ -292,6 +348,9 @@ export default function BookingForm() {
           <p className="mt-3 text-sm sm:text-base text-neutral-400 break-words">
             {t("successMessage")}
           </p>
+          {emailWarning && (
+            <p className="mt-3 text-sm text-amber-400 break-words">{t("successEmailWarning")}</p>
+          )}
           <button
             type="button"
             onClick={() => window.scrollTo({ top: 0, behavior: "smooth" })}

@@ -16,6 +16,15 @@ export const FORMSUBMIT_EMAIL =
 export const FORMSUBMIT_EMAIL_CONFIGURED =
   FORMSUBMIT_EMAIL.trim().toLowerCase() !== FORMSUBMIT_EMAIL_PLACEHOLDER;
 
+/** Web3Forms access key – must be NEXT_PUBLIC_ so the browser can send (see lib/web3forms.ts). */
+export const WEB3FORMS_ACCESS_KEY =
+  typeof process.env.NEXT_PUBLIC_WEB3FORMS_ACCESS_KEY === "string" &&
+  process.env.NEXT_PUBLIC_WEB3FORMS_ACCESS_KEY.length > 0
+    ? process.env.NEXT_PUBLIC_WEB3FORMS_ACCESS_KEY
+    : "";
+
+export const WEB3FORMS_CONFIGURED = WEB3FORMS_ACCESS_KEY.length > 0;
+
 /** Optional second recipient (e.g. Mohamed Ali). Set NEXT_PUBLIC_FORMSUBMIT_EMAIL_SECONDARY to also send form to this address. */
 export const FORMSUBMIT_EMAIL_SECONDARY =
   typeof process.env.NEXT_PUBLIC_FORMSUBMIT_EMAIL_SECONDARY === "string" &&

@@ -7,8 +7,6 @@ import {
   isClosedBookingDate,
 } from "@/lib/constants";
 import { MAIN_SERVICES } from "@/lib/services";
-import { sendBookingNotification } from "@/lib/booking-notify";
-import { formatSlotLabel, slotEndTime } from "@/lib/constants";
 
 export const dynamic = "force-dynamic";
 
@@ -107,29 +105,8 @@ export async function POST(request: NextRequest) {
 
   const governorateValue = governorate ?? "";
 
-  const notification = {
-    subject: `Exoterior – Booking: ${date} at ${formatSlotLabel(timeSlot)} – ${fullNameStr}`,
-    fullName: fullNameStr,
-    phone: phoneClean,
-    address: addressLineStr,
-    services: subServicesSafe.length > 0 ? subServicesSafe.join(", ") : "Not specified",
-    notes: notesStr.trim() || "(none)",
-    appointmentDate: date,
-    appointmentTime: `${formatSlotLabel(timeSlot)} – ${formatSlotLabel(slotEndTime(timeSlot))} (1 hour)`,
-  };
-
   const supabase = getSupabaseServer();
   if (!supabase) {
-    const emailSent = await sendBookingNotification(notification);
-    if (!emailSent) {
-      return NextResponse.json(
-        {
-          error:
-            "Booking could not be sent. Add WEB3FORMS_ACCESS_KEY (recommended, free at web3forms.com) or wait for FormSubmit to recover.",
-        },
-        { status: 503 }
-      );
-    }
     return NextResponse.json({ booked: true }, { status: 201 });
   }
 
@@ -203,9 +180,6 @@ export async function POST(request: NextRequest) {
       { status: 500 }
     );
   }
-
-  // Email is best-effort: booking is already saved in Supabase.
-  void sendBookingNotification(notification);
 
   return NextResponse.json({ booked: true }, { status: 201 });
 }
