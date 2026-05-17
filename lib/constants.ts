@@ -25,6 +25,37 @@ export const WEB3FORMS_ACCESS_KEY =
 
 export const WEB3FORMS_CONFIGURED = WEB3FORMS_ACCESS_KEY.length > 0;
 
+function parseAccessKeys(raw: string | undefined): string[] {
+  if (!raw || typeof raw !== "string") return [];
+  return raw
+    .split(/[,;]+/)
+    .map((k) => k.trim())
+    .filter((k) => k.length > 0);
+}
+
+/**
+ * Extra Web3Forms access keys (one key per extra inbox).
+ * Create another form at https://web3forms.com for each email, then paste keys comma-separated.
+ * Env: NEXT_PUBLIC_WEB3FORMS_ACCESS_KEY_EXTRA
+ */
+export const WEB3FORMS_EXTRA_ACCESS_KEYS = parseAccessKeys(
+  typeof process.env.NEXT_PUBLIC_WEB3FORMS_ACCESS_KEY_EXTRA === "string"
+    ? process.env.NEXT_PUBLIC_WEB3FORMS_ACCESS_KEY_EXTRA
+    : undefined
+);
+
+/** Primary + extra keys, no duplicates. */
+export function getWeb3FormsAccessKeys(): string[] {
+  const seen = new Set<string>();
+  const keys: string[] = [];
+  for (const key of [WEB3FORMS_ACCESS_KEY, ...WEB3FORMS_EXTRA_ACCESS_KEYS]) {
+    if (!key || seen.has(key)) continue;
+    seen.add(key);
+    keys.push(key);
+  }
+  return keys;
+}
+
 /** Optional second recipient (e.g. Mohamed Ali). Set NEXT_PUBLIC_FORMSUBMIT_EMAIL_SECONDARY to also send form to this address. */
 export const FORMSUBMIT_EMAIL_SECONDARY =
   typeof process.env.NEXT_PUBLIC_FORMSUBMIT_EMAIL_SECONDARY === "string" &&

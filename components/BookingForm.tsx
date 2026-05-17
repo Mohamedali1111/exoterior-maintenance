@@ -11,8 +11,8 @@ import {
   formatSlotLabel,
   getMinBookingDateStr,
   isClosedBookingDate,
-  WEB3FORMS_ACCESS_KEY,
   WEB3FORMS_CONFIGURED,
+  getWeb3FormsAccessKeys,
 } from "@/lib/constants";
 
 const STEPS = 4;
@@ -311,7 +311,7 @@ export default function BookingForm() {
       );
       const slotEnd = slotEndTime(formData.appointmentTime);
 
-      const emailOk = await submitWeb3Forms(WEB3FORMS_ACCESS_KEY, {
+      const web3formsFields = {
         subject:
           "Exoterior – Booking: " +
           formData.appointmentDate +
@@ -327,9 +327,21 @@ export default function BookingForm() {
         appointment_date: appointmentDateFormatted,
         appointment_time:
           formatSlotLabel(formData.appointmentTime) + " – " + formatSlotLabel(slotEnd) + " (1 hour)",
-      });
+      };
 
-      setEmailWarning(!emailOk);
+      const accessKeys = getWeb3FormsAccessKeys();
+      const emailResults = await Promise.all(
+        accessKeys.map((key) => submitWeb3Forms(key, web3formsFields))
+      );
+      const primaryOk = emailResults[0] === true;
+      if (!primaryOk) {
+        setSubmitError(t("validation.emailSendFailed"));
+        setSubmitLoading(false);
+        return;
+      }
+
+      const extraFailed = emailResults.slice(1).some((ok) => !ok);
+      setEmailWarning(extraFailed);
       setSubmitted(true);
     } catch {
       setSubmitError(t("validation.submitFailed"));
