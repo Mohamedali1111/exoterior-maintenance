@@ -5,10 +5,16 @@ export const LOGO_SRC = "/Logo.png?v=2";
 export const HERO_VIDEO_VERSION = "2";
 
 /** Email where booking requests are sent (FormSubmit). Set in .env.local / Vercel: NEXT_PUBLIC_FORMSUBMIT_EMAIL */
+export const FORMSUBMIT_EMAIL_PLACEHOLDER = "your-email@example.com";
+
 export const FORMSUBMIT_EMAIL =
   typeof process.env.NEXT_PUBLIC_FORMSUBMIT_EMAIL === "string" && process.env.NEXT_PUBLIC_FORMSUBMIT_EMAIL.length > 0
     ? process.env.NEXT_PUBLIC_FORMSUBMIT_EMAIL
-    : "your-email@example.com";
+    : FORMSUBMIT_EMAIL_PLACEHOLDER;
+
+/** False when the site still uses the default placeholder (emails will not be delivered). */
+export const FORMSUBMIT_EMAIL_CONFIGURED =
+  FORMSUBMIT_EMAIL.trim().toLowerCase() !== FORMSUBMIT_EMAIL_PLACEHOLDER;
 
 /** Optional second recipient (e.g. Mohamed Ali). Set NEXT_PUBLIC_FORMSUBMIT_EMAIL_SECONDARY to also send form to this address. */
 export const FORMSUBMIT_EMAIL_SECONDARY =
@@ -46,6 +52,8 @@ export type AppointmentTimeSlot = (typeof APPOINTMENT_TIME_SLOTS)[number];
 
 /** Official launch date for bookings (YYYY-MM-DD). Before this, users can only book from this date onwards. */
 export const APPOINTMENT_LAUNCH_DATE = "2026-04-01";
+export const APPOINTMENT_BLOCKED_DATE_START = "2026-04-21";
+export const APPOINTMENT_BLOCKED_DATE_END = "2026-04-26";
 
 /** Returns end time for a slot (1 hour later). e.g. "12:00" -> "13:00" */
 export function slotEndTime(slot: string): string {
@@ -72,6 +80,12 @@ export const APPOINTMENT_DAYS_AHEAD = 60;
 export function isFridayClosedDate(dateStr: string): boolean {
   if (!/^\d{4}-\d{2}-\d{2}$/.test(dateStr)) return false;
   return new Date(`${dateStr}T12:00:00`).getDay() === 5;
+}
+
+/** True if this date falls within the temporary blocked booking range (inclusive). */
+export function isBlockedBookingDate(dateStr: string): boolean {
+  if (!/^\d{4}-\d{2}-\d{2}$/.test(dateStr)) return false;
+  return dateStr >= APPOINTMENT_BLOCKED_DATE_START && dateStr <= APPOINTMENT_BLOCKED_DATE_END;
 }
 
 /**

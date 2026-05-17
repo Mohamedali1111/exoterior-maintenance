@@ -169,11 +169,14 @@
       "problemRequired": "Please describe your problem",
       "dateRequired": "Please choose a date",
       "dateBeforeMin": "Booking opens from 1 April 2026. Please choose 1 April 2026 or a later date.",
+      "dateBlockedRange": "Bookings are unavailable from 21 April 2026 to 26 April 2026. Please choose another date.",
       "fridayClosed": "Fridays are closed. Please choose another day.",
       "timeRequired": "Please choose a time",
       "slotTaken": "This slot is already booked",
       "slotJustBooked": "This slot was just booked. Please choose another date or time.",
-      "submitFailed": "Something went wrong. Please try again or contact us directly."
+      "submitFailed": "Something went wrong. Please try again or contact us directly.",
+      "emailNotConfigured": "Booking email is not configured on the server. Set NEXT_PUBLIC_FORMSUBMIT_EMAIL in your environment variables and redeploy.",
+      "emailSendFailed": "Your booking was saved but we could not send the notification email. Please contact us by phone or WhatsApp to confirm."
     }
   },
   "faq": {

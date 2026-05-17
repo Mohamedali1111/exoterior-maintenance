@@ -4,6 +4,7 @@ import {
   getMinBookingDateStr,
   APPOINTMENT_TIME_SLOTS,
   EGYPT_PHONE_REGEX,
+  isBlockedBookingDate,
   isFridayClosedDate,
 } from "@/lib/constants";
 import { MAIN_SERVICES } from "@/lib/services";
@@ -78,6 +79,13 @@ export async function POST(request: NextRequest) {
     );
   }
 
+  if (isBlockedBookingDate(date)) {
+    return NextResponse.json(
+      { error: "This date is unavailable from 21 April 2026 to 26 April 2026. Please choose another day." },
+      { status: 400 }
+    );
+  }
+
   const allowedSlots: string[] = [...APPOINTMENT_TIME_SLOTS];
   if (!allowedSlots.includes(timeSlot)) {
     return NextResponse.json({ error: "Invalid time slot" }, { status: 400 });
@@ -118,7 +126,14 @@ export async function POST(request: NextRequest) {
     .eq("time_slot", timeSlot);
 
   if (existingError) {
-    return NextResponse.json({ error: "Failed to check slot availability" }, { status: 500 });
+    console.error("Supabase slot check failed:", existingError.message);
+    return NextResponse.json(
+      {
+        error:
+          "Booking storage is misconfigured. Check Supabase credentials and run lib/supabase-appointments.sql, or remove Supabase env vars to use email-only mode.",
+      },
+      { status: 503 }
+    );
   }
 
   type ExistingRow = { sub_services: string[] | null };
@@ -164,8 +179,12 @@ export async function POST(request: NextRequest) {
         { status: 409 }
       );
     }
+    console.error("Supabase insert failed:", error.message);
     return NextResponse.json(
-      { error: "Failed to book" },
+      {
+        error:
+          "Could not save the booking. If Supabase is enabled, verify the appointments table exists (see lib/supabase-appointments.sql).",
+      },
       { status: 500 }
     );
   }
