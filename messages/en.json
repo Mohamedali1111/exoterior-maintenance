@@ -159,6 +159,7 @@
     "contactAfterSubmit": "We’ll contact you on this number to confirm.",
     "successTitle": "Request sent",
     "successMessage": "We received your request and will contact you shortly to confirm.",
+    "successEmailWarning": "We saved your booking but could not send the email notification. We will still contact you on the phone number you provided.",
     "successCta": "Back to home",
     "validation": {
       "nameRequired": "Name is required",
