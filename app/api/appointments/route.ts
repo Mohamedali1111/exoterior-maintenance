@@ -4,8 +4,7 @@ import {
   getMinBookingDateStr,
   APPOINTMENT_TIME_SLOTS,
   EGYPT_PHONE_REGEX,
-  isBlockedBookingDate,
-  isFridayClosedDate,
+  isClosedBookingDate,
 } from "@/lib/constants";
 import { MAIN_SERVICES } from "@/lib/services";
 
@@ -72,16 +71,9 @@ export async function POST(request: NextRequest) {
     );
   }
 
-  if (isFridayClosedDate(date)) {
+  if (isClosedBookingDate(date)) {
     return NextResponse.json(
-      { error: "We are closed on Fridays. Please choose another day." },
-      { status: 400 }
-    );
-  }
-
-  if (isBlockedBookingDate(date)) {
-    return NextResponse.json(
-      { error: "This date is unavailable from 21 April 2026 to 26 April 2026. Please choose another day." },
+      { error: "This date is unavailable. Please choose another day." },
       { status: 400 }
     );
   }
