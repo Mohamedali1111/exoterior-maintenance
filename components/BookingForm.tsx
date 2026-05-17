@@ -5,9 +5,6 @@ import { useTranslations, useLocale } from "next-intl";
 import { MAIN_SERVICES, type MainServiceId } from "@/lib/services";
 import {
   EGYPT_PHONE_REGEX,
-  FORMSUBMIT_EMAIL,
-  FORMSUBMIT_EMAIL_SECONDARY,
-  FORMSUBMIT_EMAIL_EXTRA,
   APPOINTMENT_TIME_SLOTS,
   APPOINTMENT_DAYS_AHEAD,
   slotEndTime,
@@ -81,7 +78,6 @@ export default function BookingForm() {
   const [locationLoading, setLocationLoading] = useState(false);
   const [locationError, setLocationError] = useState<string | null>(null);
   const [submitted, setSubmitted] = useState(false);
-  const [emailWarning, setEmailWarning] = useState(false);
   const [submitLoading, setSubmitLoading] = useState(false);
   const [submitError, setSubmitError] = useState<string | null>(null);
   const [takenSlots, setTakenSlots] = useState<string[]>([]);
@@ -278,67 +274,6 @@ export default function BookingForm() {
         return;
       }
 
-      const servicesList =
-        formData.subServices.length > 0
-          ? formData.subServices.map((s) => tServices(`main.${s}`)).join(", ")
-          : locale === "ar"
-            ? "غير محدد"
-            : "Not specified";
-      const appointmentDateFormatted = new Date(formData.appointmentDate + "T12:00:00").toLocaleDateString(
-        locale === "ar" ? "ar-EG" : "en-GB",
-        { weekday: "long", day: "numeric", month: "long", year: "numeric" }
-      );
-      const slotEnd = slotEndTime(formData.appointmentTime);
-      const submittedAt = new Date().toLocaleString(locale === "ar" ? "ar-EG" : "en-GB", {
-        dateStyle: "medium",
-        timeStyle: "short",
-      });
-
-      const buildEmailBody = () => {
-        const body = new FormData();
-        body.append(
-          "_subject",
-          "Exoterior – Booking: " +
-            formData.appointmentDate +
-            " at " +
-            formatSlotLabel(formData.appointmentTime) +
-            " – " +
-            formData.fullName
-        );
-        body.append("_captcha", "false");
-        body.append("Full name", formData.fullName);
-        body.append("Phone", formData.phone);
-        body.append("Address", formData.addressLine);
-        body.append("Services", servicesList);
-        body.append("Problem / description", formData.notes.trim() || "(none)");
-        body.append("Appointment date", appointmentDateFormatted);
-        body.append(
-          "Appointment time",
-          formatSlotLabel(formData.appointmentTime) + " – " + formatSlotLabel(slotEnd) + " (1 hour)"
-        );
-        body.append("Submitted at", submittedAt);
-        return body;
-      };
-
-      const primaryLc = FORMSUBMIT_EMAIL.trim().toLowerCase();
-      const secondaryLc = FORMSUBMIT_EMAIL_SECONDARY?.trim().toLowerCase() ?? null;
-      const sends: Promise<unknown>[] = [
-        fetch(`https://formsubmit.co/${FORMSUBMIT_EMAIL}`, { method: "POST", body: buildEmailBody() }),
-      ];
-      if (FORMSUBMIT_EMAIL_SECONDARY) {
-        sends.push(
-          fetch(`https://formsubmit.co/${FORMSUBMIT_EMAIL_SECONDARY}`, { method: "POST", body: buildEmailBody() })
-        );
-      }
-      for (const extra of FORMSUBMIT_EMAIL_EXTRA) {
-        const el = extra.trim().toLowerCase();
-        if (!el || el === primaryLc || el === secondaryLc) continue;
-        sends.push(fetch(`https://formsubmit.co/${extra.trim()}`, { method: "POST", body: buildEmailBody() }));
-      }
-
-      const emailResults = await Promise.allSettled(sends);
-      const emailFailed = emailResults.some((r) => r.status === "rejected");
-      setEmailWarning(emailFailed);
       setSubmitted(true);
     } catch {
       setSubmitError(t("validation.submitFailed"));
@@ -357,9 +292,6 @@ export default function BookingForm() {
           <p className="mt-3 text-sm sm:text-base text-neutral-400 break-words">
             {t("successMessage")}
           </p>
-          {emailWarning && (
-            <p className="mt-3 text-sm text-amber-400 break-words">{t("successEmailWarning")}</p>
-          )}
           <button
             type="button"
             onClick={() => window.scrollTo({ top: 0, behavior: "smooth" })}
